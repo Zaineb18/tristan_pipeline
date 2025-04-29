@@ -1,0 +1,69 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Pytest cache
+.cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+
+# MyPy & other linters
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# VSCode and other IDEs
+.vscode/
+.idea/
+
+# MacOS & system files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# fMRI-related
+# Large imaging files - keep these out of git
+*.nii
+*.nii.gz
+*.mgz
+*.mnc
+*.dcm
+
+# Temporary working files (e.g., preprocessing intermediates)
+derivatives/
+work/
+tmp/
+
+# If using Datalad or BIDS
+.datalad/
+
+# Misc
+*.bak
+*.swp
+
