@@ -47,14 +47,14 @@ for subj in subjects:
             #In PA json
             with open(json_pa_path, 'r') as f:
                 fmap_data_pa = json.load(f)
-            fmap_data_pa['IntendedFor'] = ["func"+matching_func.split('func')[1]]
+            fmap_data_pa['IntendedFor'] = [f'ses-{ses}/'+"func"+matching_func.split('func')[1]]
             fmap_data_pa["PhaseEncodingDirection"]= "j"
             with open(json_pa_path, 'w') as f:
                 json.dump(fmap_data_pa, f, indent=4) 
             #In AP json
             with open(json_ap_path, 'r') as f:
                 fmap_data_ap = json.load(f)
-            fmap_data_ap['IntendedFor'] = ["func"+matching_func.split('func')[1]]
+            fmap_data_ap['IntendedFor'] = [f'ses-{ses}/'+"func"+matching_func.split('func')[1]]
             fmap_data_ap["PhaseEncodingDirection"]= "j-"
             with open(json_ap_path, 'w') as f:
                 json.dump(fmap_data_ap, f, indent=4) 
