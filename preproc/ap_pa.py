@@ -8,6 +8,7 @@ from nilearn.image import mean_img, load_img, index_img
 import os
 import shutil, json
 
+##### prep the ap/pa iles and match them to the correct bold files
 for subj in subjects: 
     for ses in sessions: 
         RFUNC_PATH, RFMAP_PATH = load_rawdata(GLOB_DIR, subj, ses)    
@@ -64,6 +65,51 @@ for subj in subjects:
             with open(json_bold_path, 'w') as f:
                 json.dump(fmap_data, f, indent=4) 
 
+##### make the fmaps bids compliant
+import re
+import os
+import shutil
+from collections import defaultdict
+
+for subj in subjects: 
+    for ses in sessions: 
+        RFUNC_PATH, RFMAP_PATH = load_rawdata(GLOB_DIR, subj, ses)
+
+        # Group fieldmaps by task/acq (to match AP/PA pairs)
+        pair_groups = defaultdict(list)
+        for fmap_file in RFMAP_PATH:
+            match = re.search(r'task-[^_]+_acq-[^_]+', fmap_file)
+            if match:
+                key = match.group()
+                pair_groups[key].append(fmap_file)
+
+        run = 1
+        for key, files in sorted(pair_groups.items()):
+            for fmap_file in files:
+                # Determine extensions
+                for ext in ['.nii', '.nii.gz']:
+                    if fmap_file.endswith(ext):
+                        base_file = fmap_file
+                        json_file = fmap_file.replace(ext, '.json')
+                        break
+                else:
+                    continue  # Skip if extension not found
+
+                # Rename using run-XX
+                new_base = re.sub(r'task-[^_]+_acq-[^_]+', f'run-{run:02}', base_file)
+                new_json = re.sub(r'task-[^_]+_acq-[^_]+', f'run-{run:02}', json_file)
+
+                print(f"Renaming: {base_file} → {new_base}")
+                print(f"Renaming: {json_file} → {new_json} \n")
+
+                # Uncomment to actually rename
+                shutil.copy(base_file, new_base)
+                shutil.copy(json_file, new_json)
+                os.remove(base_file)
+                os.remove(json_file)
+                compress_nii_to_niigz(new_base)
+
+            run += 1
 
 
  
