@@ -8,7 +8,7 @@ sessions = [1]
 RAW_PATH = os.path.join(GLOB_DIR, 'rawdata')
 
 
-DATA_DIR = "/home/zamor/Documents/TRISTAN/data/bids"
+DATA_DIR = "/home/zamor/Documents/TRISTAN/data_onavON"
 FMRIPREP_PATH =os.path.join(DATA_DIR, 'derivatives', 'fmriprep')
 TRANSFORM_PATH = os.path.join(DATA_DIR, 'derivatives', 'h5_transforms')
 CHARM_PATH =os.path.join(DATA_DIR, 'derivatives', 'charmtms')

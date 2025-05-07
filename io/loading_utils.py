@@ -7,3 +7,13 @@ def load_rawdata(GLOB_DIR, subj, ses):
     RFUNC_PATH = glob.glob(os.path.join(RAW_PATH, f'sub-{subj:02}', f'ses-{ses}', 'func', f'sub-{subj:02}_ses-{ses}*_bold.nii'))
     RFMAP_PATH = glob.glob(os.path.join(RAW_PATH, f'sub-{subj:02}', f'ses-{ses}', 'fmap', f'sub-{subj:02}_ses-{ses}*_epi.nii'))
     return(RFUNC_PATH, RFMAP_PATH)
+
+def load_fmriprepdata(FMRIPREP_PATH, subj, ses, space):
+    FUNC_PATH = sorted(glob.glob(os.path.join(FMRIPREP_PATH, f'sub-{subj:02}', f'ses-{ses}', 'func', f'*space-{space}*bold.nii.gz')))
+    MASK_PATH = sorted(glob.glob(os.path.join(FMRIPREP_PATH, f'sub-{subj:02}', f'ses-{ses}', 'func', f'*space-{space}*brain_mask.nii.gz')))
+    confounds_file = sorted(glob.glob(os.path.join(FMRIPREP_PATH, f'sub-{subj:02}', f'ses-{ses}', 'func', f"*_desc-confounds_timeseries.tsv")))
+
+    ANAT_PATH = glob.glob(os.path.join(FMRIPREP_PATH, f'sub-{subj:02}', f'ses-{ses}', 'anat', f'*space-{space}*_T1w.nii.gz'))
+    GM_PATH = glob.glob(os.path.join(FMRIPREP_PATH, f'sub-{subj:02}', f'ses-{ses}', 'anat', f'*space-{space}*_label-GM_probseg.nii.gz'))
+    return(FUNC_PATH, MASK_PATH, confounds_file, ANAT_PATH, GM_PATH)
+

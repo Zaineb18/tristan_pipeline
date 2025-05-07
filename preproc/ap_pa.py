@@ -8,7 +8,7 @@ from nilearn.image import mean_img, load_img, index_img
 import os
 import shutil, json
 
-##### prep the ap/pa iles and match them to the correct bold files
+#####First: prep the ap/pa files and match them to the correct bold files
 for subj in subjects: 
     for ses in sessions: 
         RFUNC_PATH, RFMAP_PATH = load_rawdata(GLOB_DIR, subj, ses)    
@@ -47,14 +47,14 @@ for subj in subjects:
             #In PA json
             with open(json_pa_path, 'r') as f:
                 fmap_data_pa = json.load(f)
-            fmap_data_pa['IntendedFor'] = [f'ses-{ses}/'+"func"+matching_func.split('func')[1]]
+            fmap_data_pa['IntendedFor'] = [matching_func.split(f'sub-{subj:02}/')[1]]
             fmap_data_pa["PhaseEncodingDirection"]= "j"
             with open(json_pa_path, 'w') as f:
                 json.dump(fmap_data_pa, f, indent=4) 
             #In AP json
             with open(json_ap_path, 'r') as f:
                 fmap_data_ap = json.load(f)
-            fmap_data_ap['IntendedFor'] = [f'ses-{ses}/'+"func"+matching_func.split('func')[1]]
+            fmap_data_ap['IntendedFor'] = [matching_func.split(f'sub-{subj:02}/')[1]]
             fmap_data_ap["PhaseEncodingDirection"]= "j-"
             with open(json_ap_path, 'w') as f:
                 json.dump(fmap_data_ap, f, indent=4) 
@@ -65,7 +65,7 @@ for subj in subjects:
             with open(json_bold_path, 'w') as f:
                 json.dump(fmap_data, f, indent=4) 
 
-##### make the fmaps bids compliant
+#####Second: make the fmaps bids compliant
 import re
 import os
 import shutil
@@ -110,9 +110,3 @@ for subj in subjects:
                 compress_nii_to_niigz(new_base)
 
             run += 1
-
-
- 
-
-
-    

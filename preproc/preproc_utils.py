@@ -32,11 +32,12 @@ def add_ignore_suffix(file_path):
     os.rename(file_path, new_path)
     print(f"Renamed:\n  {file_path}\n→ {new_path}")
 
-def clean_bold(fpath,tr=1.09):
-    confounds, sample_mask = load_confounds(fpath, strategy=('motion','wm_csf','global_signal'), motion='derivatives', scrub=0)
-    clean_func = clean_img(imgs=fpath, confounds=confounds, standardize=False, detrend=False, low_pass=None, high_pass=None, t_r=tr)
+def clean_bold(fpath,tr=2.12):
+    confounds, _ = load_confounds(fpath, strategy=('motion','wm_csf','global_signal'), motion='full',
+                                  wm_csf='full', global_signal='full',scrub=0)
+    clean_func = clean_img(imgs=fpath, confounds=confounds, standardize=False, detrend=True, low_pass=0.1, high_pass=0.01, t_r=tr)
     mean_func = mean_img(clean_func)
-    return(clean_func, mean_func, sample_mask, confounds)
+    return(clean_func, mean_func, confounds)
 
 def compress_nii_to_niigz(nii_path):
     if nii_path.endswith('.nii') and not nii_path.endswith('.nii.gz'):
