@@ -29,16 +29,26 @@ This dataset provides a benchmark for evaluating preprocessing accuracy, motion 
 Project Structure
 -----------------
 tristan_pipeline/
+
 │
 ├── preproc/       ← preprocessing scripts (motion correction, normalization, etc)
+
 ├── analysis/      ← model fitting, statistics, group-level analysis
+
 ├── plotting/      ← visualization scripts & notebooks
+
 ├── io/            ← data loading and saving utilities
-├── utils/        
-├── notebooks/    
-├── scripts/     
+
+├── utils/  
+
+├── notebooks/   
+
+├── scripts/    
+
 ├── LICENSE
+
 ├── README.md
+
 
 Getting Started
 ---------------
