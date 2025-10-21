@@ -34,4 +34,25 @@ tristan_pipeline/
 ├── analysis/      ← model fitting, statistics, group-level analysis
 ├── plotting/      ← visualization scripts & notebooks
 ├── io/            ← data loading and saving utilities
-├── utils/         ← helper f
+├── utils/        
+├── notebooks/    
+├── scripts/     
+├── LICENSE
+├── README.md
+
+Getting Started
+---------------
+1. Clone the repository
+   git clone https://github.com/Zaineb18/tristan_pipeline.git
+   cd tristan_pipeline
+
+2. Install dependencies
+    Typical dependencies include nibabel, nilearn, numpy, scipy, matplotlib, pandas.
+
+3. Prepare your data
+   - Organize your fMRI data following a BIDS-like structure (recommended).
+   - Edit configuration files to match your acquisition parameters (e.g., TR, voxel size, smoothing kernel).
+
+License
+-------
+This project is licensed under the MIT License — see the LICENSE file for details.
