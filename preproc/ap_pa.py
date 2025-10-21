@@ -8,9 +8,14 @@ from nilearn.image import mean_img, load_img, index_img
 import os
 import shutil, json
 
+subjects = [5]
+sessions = [1]
+
 #####First: prep the ap/pa files and match them to the correct bold files
 for subj in subjects: 
-    for ses in sessions: 
+    for ses in sessions:
+        #subj = 2
+        #ses = 1 
         RFUNC_PATH, RFMAP_PATH = load_rawdata(GLOB_DIR, subj, ses)    
         for fmap_file in RFMAP_PATH:
             try:
@@ -37,8 +42,12 @@ for subj in subjects:
             else:
                 print(f"Matched fmap {fmap_file} with func {matching_func} \n")
             #Take first volume from funtional run for AP 
+            
+            #matching_func= "/home/zamor/Documents/TRISTAN/data_Caro/rawdata/sub-03/ses-1/fmap/sub-03_ses-1_dir-PA_epi.nii"
             bold_img = nib.load(matching_func)
             ap_img = index_img(bold_img, 0)
+            #ap_img.to_filename("/home/zamor/Documents/TRISTAN/data_Caro/rawdata/sub-03/ses-1/fmap/sub-03_ses-1_dir-PA_epi__.nii")
+            
             ap_img.to_filename(fmap_file.replace("dir-PA","dir-AP"))
             json_bold_path = matching_func.replace('nii','json')
             json_pa_path = fmap_file.replace("nii","json")
@@ -72,9 +81,8 @@ import shutil
 from collections import defaultdict
 
 for subj in subjects: 
-    for ses in sessions: 
+    for ses in sessions:
         RFUNC_PATH, RFMAP_PATH = load_rawdata(GLOB_DIR, subj, ses)
-
         # Group fieldmaps by task/acq (to match AP/PA pairs)
         pair_groups = defaultdict(list)
         for fmap_file in RFMAP_PATH:
