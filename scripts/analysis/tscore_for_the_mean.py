@@ -5,9 +5,9 @@ from nilearn import image, plotting
 from nilearn.maskers import NiftiMasker
 from nilearn.signal import clean
 from tristan_pipeline.io.params import *
-from tristan_pipeline.io.loading_utils import *
-from tristan_pipeline.preproc.preproc_utils import *
-from tristan_pipeline.analysis.glm_utils import *
+from tristan_pipeline.utils.loading_utils import *
+from tristan_pipeline.utils.preproc_utils import *
+from tristan_pipeline.utils.glm_utils import *
 
 ##########CONFIG###########
 stimfile = "/home/zamor/nasShare/INM-GlobalShare/Boulantetal_Tristan_2025/stimfiles/session1_localizer_standard.csv"

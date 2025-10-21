@@ -1,6 +1,6 @@
 from tristan_pipeline.io.params import *
-from tristan_pipeline.io.loading_utils import *
-from tristan_pipeline.preproc.preproc_utils import *
+from tristan_pipeline.utils.loading_utils import *
+from tristan_pipeline.utils.preproc_utils import *
 
 import glob
 import nibabel as nib

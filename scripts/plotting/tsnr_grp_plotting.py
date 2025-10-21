@@ -3,7 +3,7 @@ import numpy as np
 import nibabel as nib
 from nilearn import plotting, image
 import matplotlib.pyplot as plt
-from tristan_pipeline.plotting.plotting_utils import *
+from tristan_pipeline.utils.plotting_utils import *
 
 ##########CONFIG###########
 subjects = [1,2,3,4]

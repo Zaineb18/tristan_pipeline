@@ -9,11 +9,11 @@ from nilearn.image import math_img
 from nilearn.masking import apply_mask
 from nilearn.glm import threshold_stats_img
 from tristan_pipeline.io.params import *
-from tristan_pipeline.io.loading_utils import *
-from tristan_pipeline.preproc.preproc_utils import *
-from tristan_pipeline.analysis.glm_utils import *
-from tristan_pipeline.analysis.analysis_utils import *
-from tristan_pipeline.plotting.plotting_utils import *
+from tristan_pipeline.utils.loading_utils import *
+from tristan_pipeline.utils.preproc_utils import *
+from tristan_pipeline.utils.glm_utils import *
+from tristan_pipeline.utils.analysis_utils import *
+from tristan_pipeline.utils.plotting_utils import *
 
 
 #####SET UP PARAMS#####

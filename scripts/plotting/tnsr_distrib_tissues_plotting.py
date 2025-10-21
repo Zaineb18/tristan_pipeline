@@ -1,8 +1,8 @@
 from tristan_pipeline.io.params import *
-from tristan_pipeline.io.loading_utils import *
-from tristan_pipeline.preproc.preproc_utils import *
-from tristan_pipeline.analysis.analysis_utils import *
-from tristan_pipeline.plotting.plotting_utils import *
+from tristan_pipeline.utils.loading_utils import *
+from tristan_pipeline.utils.preproc_utils import *
+from tristan_pipeline.utils.analysis_utils import *
+from tristan_pipeline.utils.plotting_utils import *
 
 from nilearn.plotting import plot_stat_map
 from nilearn import plotting, image

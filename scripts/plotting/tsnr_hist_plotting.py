@@ -2,7 +2,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
-from tristan_pipeline.plotting.plotting_utils import *
+from tristan_pipeline.utils.plotting_utils import *
 
 ##########CONFIG###########
 subjects = [1,2,3,4]   # loop over multiple subjects
