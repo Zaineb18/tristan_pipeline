@@ -4,6 +4,8 @@ import os
 import nibabel as nib 
 from nilearn.plotting import plot_stat_map
 from nilearn import datasets, surface, plotting,image 
+
+
 #####PLOTTING SETTINGS#####
 plt.rcParams.update({
     'font.size': 16,
@@ -13,7 +15,6 @@ plt.rcParams.update({
     'xtick.labelsize': 14,
     'ytick.labelsize': 14
 })
-
 
 def coord_plot11(mopa_pred_list, Y_names=None, TR=0.04, sub=0):
 
@@ -55,10 +56,11 @@ def coord_plot11(mopa_pred_list, Y_names=None, TR=0.04, sub=0):
     #plt.savefig(f'/home/sergerm/PhD/onav-pmc/Data/plots/Coord_plot11_{sub}.png')
     plt.show()
     return None
+
 def plot_activations(z_map, anat_file, gm_file, threshold, contrast, moco, space, cut_coords, subj, ses, FMRIPREP_PATH, thresh_strag='fpr'): 
-    disp = plot_stat_map(z_map, anat_file,
+    disp = plot_stat_map(z_map, anat_file,colorbar=False,
     title=f'Custom contrast: {contrast} \n {moco} - {space}', vmax=10,
-    display_mode='z',threshold=threshold,cut_coords=cut_coords, )
+    display_mode='z',threshold=threshold,cut_coords=cut_coords)
     disp.add_contours(gm_file, levels=[0.5], colors='cyan',linewidths=0.5, alpha=0.5)
     plt.savefig(os.path.join(FMRIPREP_PATH, 'figures',
     f'sub-{subj:02}_ses-{ses}_zmap_{contrast}_{space}_{moco}_{thresh_strag}'))
@@ -72,10 +74,10 @@ def disp_surf_activations(space, z_map, FREESURFER_PATH,FMRIPREP_PATH, contrast,
                         os.path.join(FREESURFER_PATH, 'lh.inflated'),
                         texture,
                         hemi='left',
-                        title=f'Custom contrast: {contrast} \n {moco}', colorbar=True,
+                        title=f'Custom contrast: {contrast} \n {moco}',
                         threshold=2.5,
                         bg_map=os.path.join(FREESURFER_PATH, 'lh.sulc'),
-                        vmax=6,
+                        vmax=6,colorbar=False,
                         output_file=os.path.join(FMRIPREP_PATH, 'figures',
                         f'sub-{subj:02}_ses-{ses}_surf-left_{contrast}_{space}_{moco}'))           
         
@@ -84,10 +86,10 @@ def disp_surf_activations(space, z_map, FREESURFER_PATH,FMRIPREP_PATH, contrast,
                         os.path.join(FREESURFER_PATH, 'rh.inflated'),
                         texture,
                         hemi='right',
-                        title=f'Custom contrast: {contrast} \n {moco}', colorbar=True,
+                        title=f'Custom contrast: {contrast} \n {moco}',
                         threshold=2.5,
                         bg_map=os.path.join(FREESURFER_PATH, 'rh.sulc'),
-                        vmax=6,
+                        vmax=6,colorbar=False,
                         output_file=os.path.join(FMRIPREP_PATH, 'figures',
                         f'sub-{subj:02}_ses-{ses}_surf-right_{contrast}_{space}_{moco}'))
     else:               
@@ -98,10 +100,10 @@ def disp_surf_activations(space, z_map, FREESURFER_PATH,FMRIPREP_PATH, contrast,
                         fsaverage.infl_left,
                         texture,
                         hemi='left',
-                        title=f'Custom contrast: {contrast} \n {moco}', colorbar=True,
+                        title=f'Custom contrast: {contrast} \n {moco}',
                         threshold=2.5,
                         bg_map=fsaverage.sulc_left,
-                        vmax=6,
+                        vmax=6,colorbar=False,
                         output_file=os.path.join(FMRIPREP_PATH, 'figures',
                         f'sub-{subj:02}_ses-{ses}_surf-left_{contrast}_{space}_{moco}'))
 
@@ -110,14 +112,13 @@ def disp_surf_activations(space, z_map, FREESURFER_PATH,FMRIPREP_PATH, contrast,
                         fsaverage.infl_right,
                         texture,
                         hemi='right',
-                        title=f'Custom contrast: {contrast} \n {moco}', colorbar=True,
+                        title=f'Custom contrast: {contrast} \n {moco}',
                         threshold=2.5,
                         bg_map=fsaverage.sulc_right,
-                        vmax=6,
+                        vmax=6,colorbar=False,
                         output_file=os.path.join(FMRIPREP_PATH, 'figures',
                         f'sub-{subj:02}_ses-{ses}_surf-right_{contrast}_{space}_{moco}'))
         
-
 def display_tissues(gm_core, wm_core, csf_core,
                     gm_wm_interface, gm_csf_interface,
                     affine, anat_img, title="Tissues and Interfaces"):

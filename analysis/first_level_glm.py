@@ -16,7 +16,7 @@ contrasts_names = ['calculations','checkerboard vs the others','clic right vs cl
 mocos = ["ONAVonPEERSon"]
 spaces = ["MNI152NLin2009cAsym", "T1w"]#
 onav = True
-subjects = [1,2,3]
+subjects = [1,2,3,4]
 sessions = [1]
 onav_files = {1:"Y_B0_sent_2025-04-2311_47_37.753099.npy",
              2:"Y_B0_sent_2025-05-2714_30_55.782043.npy", 

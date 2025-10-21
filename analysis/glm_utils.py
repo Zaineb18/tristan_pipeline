@@ -35,20 +35,6 @@ def elementary_contrast(design_matrix_columns):
         elem_contrast[design_matrix_columns[i]] = np.eye(n_columns)[i]
     return elem_contrast
 
-
-def custom_contrast_(design_matrix_columns):
-    elem_contrast = elementary_contrast(design_matrix_columns)
-    contrasts = {            
-                 'mean signal': elem_contrast['constant'],
-                 'CboardH': elem_contrast['CboardH'],
-                 'CboardV': elem_contrast['CboardV'],
-                 'calculations': elem_contrast['calculvideo']+elem_contrast['calculaudio'],
-                 'checkerboard vs the others': elem_contrast['CboardH']+elem_contrast['CboardV']-elem_contrast['calculvideo']-elem_contrast['calculaudio']-elem_contrast['phraseVideo']-elem_contrast['phraseAudio']-elem_contrast['clicDvideo']-elem_contrast['clicGvideo']-elem_contrast['clicDaudio']-elem_contrast['clicGaudio'],
-                 'clic right vs clic left': elem_contrast['clicDvideo'] - elem_contrast['clicGvideo'] + elem_contrast['clicDaudio'] - elem_contrast['clicGaudio'],
-                 }
-    return contrasts
-
-
 def custom_contrast(design_matrix_columns):
     elem_contrast = elementary_contrast(design_matrix_columns)
     contrasts = {            
@@ -67,5 +53,18 @@ def custom_contrast(design_matrix_columns):
                  'phrases vs checkerboard': elem_contrast['phraseVideo'] - elem_contrast['CboardH'] - elem_contrast['CboardV'],
                  'calculations vs clic': elem_contrast['calculvideo'] - elem_contrast['clicDvideo'] - elem_contrast['clicGvideo'],
                  'phrases vs clic': elem_contrast['phraseVideo'] - elem_contrast['clicDvideo'] - elem_contrast['clicGvideo'],
+                 }
+    return contrasts
+
+
+def custom_contrast_(design_matrix_columns):
+    elem_contrast = elementary_contrast(design_matrix_columns)
+    contrasts = {            
+                 'mean signal': elem_contrast['constant'],
+                 'CboardH': elem_contrast['CboardH'],
+                 'CboardV': elem_contrast['CboardV'],
+                 'calculations': elem_contrast['calculvideo']+elem_contrast['calculaudio'],
+                 'checkerboard vs the others': elem_contrast['CboardH']+elem_contrast['CboardV']-elem_contrast['calculvideo']-elem_contrast['calculaudio']-elem_contrast['phraseVideo']-elem_contrast['phraseAudio']-elem_contrast['clicDvideo']-elem_contrast['clicGvideo']-elem_contrast['clicDaudio']-elem_contrast['clicGaudio'],
+                 'clic right vs clic left': elem_contrast['clicDvideo'] - elem_contrast['clicGvideo'] + elem_contrast['clicDaudio'] - elem_contrast['clicGaudio'],
                  }
     return contrasts
