@@ -41,13 +41,11 @@ for subj in subjects:
                 print(f"No matching func file found for {fmap_file} \n")
             else:
                 print(f"Matched fmap {fmap_file} with func {matching_func} \n")
-            #Take first volume from funtional run for AP 
-            
+            #Take first volume from funtional run for AP             
             #matching_func= "/home/zamor/Documents/TRISTAN/data_Caro/rawdata/sub-03/ses-1/fmap/sub-03_ses-1_dir-PA_epi.nii"
             bold_img = nib.load(matching_func)
             ap_img = index_img(bold_img, 0)
             #ap_img.to_filename("/home/zamor/Documents/TRISTAN/data_Caro/rawdata/sub-03/ses-1/fmap/sub-03_ses-1_dir-PA_epi__.nii")
-            
             ap_img.to_filename(fmap_file.replace("dir-PA","dir-AP"))
             json_bold_path = matching_func.replace('nii','json')
             json_pa_path = fmap_file.replace("nii","json")
