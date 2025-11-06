@@ -106,7 +106,7 @@ for subj_idx, subj in enumerate(subjects):
                label='ONAV')
     ]
 
-    first_legend = plt.legend(handles=moco_legend, title="fMRIPrep motion corrections", loc="upper right")
+    first_legend = plt.legend(handles=moco_legend, title="fMRIPrep estimates", loc="upper right")
     plt.gca().add_artist(first_legend)
     plt.legend(handles=onav_legend, title="ONAV estimate", loc="upper center")
     plt.tight_layout()

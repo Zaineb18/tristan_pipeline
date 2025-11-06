@@ -25,7 +25,8 @@ subject_colors = {
 }
 # Visual distinction for mocos
 markers = ['o', 's', '^']        # different markers per moco
-moco_widths = [1.5, 2.0, 2.5]    # progressively thicker
+#moco_widths = [1.5, 2.0, 2.5]    # progressively thicker
+moco_widths = [0.5, 1.0, 1.5]    # progressively thicker
 moco_brightness = [2, 1.0, 0.7]  # lighter → darker
 
 

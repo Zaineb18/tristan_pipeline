@@ -13,27 +13,9 @@ from tristan_pipeline.utils.glm_utils import *
 from tristan_pipeline.utils.analysis_utils import *
 from tristan_pipeline.utils.plotting_utils import *
 
-# ----------------
-# CONFIG
-# ----------------
-subjects = [1,2,3,4]#,2,3,4]
-sessions = [1]
-mocos = [
-    # ("ONAVoffPEERSoff", 'tab:blue'),
-    # ("ONAVoffPEERSon", 'tab:orange'),
-    # ("ONAVonPEERSoff", 'tab:green'),
-    ("ONAVonPEERSon", 'tab:red')
-]
-spaces = ["MNI152NLin2009cAsym", "T1w"]
-space_styles = ['-', '--', ':']  # assign one per space
 contrasts = ["clic right vs clic left"]
-# Subject-specific acquisition params
-d_vols = {1:0, 2:2, 3:2, 4:2}
-n_vols = {1:153, 2:155, 3:155, 4:155}
-trs = {1:2.12, 2:2.12, 3:2.16, 4:2.12}
-linestyles = ['-', '--', 'dashdot', ':']  # differentiate mocos if multiple
-base_dir = "/home/zamor/Documents/TRISTAN/ismrm_dataset"
-stimfile = "/home/zamor/nasShare/INM-GlobalShare/Boulantetal_Tristan_2025/stimfiles/session1_localizer_standard.csv"
+#spaces = ["MNI152NLin2009cAsym"]
+spaces = ["T1w"]
 
 # ----------------
 # LOOP OVER SUBJECTS
@@ -43,6 +25,7 @@ for subj in subjects:
         n_scans = n_vols[subj]
         delay_volumes = d_vols[subj]
         tr = trs[subj]
+        subj_color = subject_colors.get(subj, 'black')
 
         stimfile = "/home/zamor/nasShare/INM-GlobalShare/Boulantetal_Tristan_2025/stimfiles/session1_localizer_standard.csv"
         events, task_vector_right, task_vector_left, task_vector_calc = events_task_vectors(
@@ -50,21 +33,20 @@ for subj in subjects:
         )
 
         all_means_right, all_means_left = [], []
-
+        print(subj)
         # ----------------
         # LOAD DATA
         # ----------------
-        for idx_moco, (moco_label, _) in enumerate(mocos):
+        for idx_moco, moco_label in enumerate(mocos):
             data_dir = f"{base_dir}/sub-{subj:02}/data_{moco_label}"
             FMRIPREP_PATH = os.path.join(data_dir, "derivatives", "fmriprep")
-            #FMRIPREP_PATH = os.path.join(base_dir, "derivatives", "fmriprep")
-
+            print(moco_label)
             for idx_space, space in enumerate(spaces):
                 FUNC_PATH, MASK_PATH, confounds_files, ANAT_PATH, GM_PATH,WM_PATH,CSF_PATH,xfm_MNItoT1, xfm_T1toMNI = load_fmriprepdata(
                     FMRIPREP_PATH, subj, ses, space
                 )
                 bold_file, mask_file = FUNC_PATH[0], MASK_PATH[0]
-
+                print(space)
                 for contrast in contrasts:
                     z_map_path = os.path.join(
                         FMRIPREP_PATH, "stat",
@@ -79,112 +61,113 @@ for subj in subjects:
                         z_map, alpha=0.001, height_control="fpr", two_sided=True
                     )
 
+                    # ----------------
+                    # Extract mean timecourse for clicks
+                    # ----------------
                     if contrast == "clic right vs clic left":
-                        pos_mask = math_img("img > 3.2905", img=z_map)
-                        neg_mask = math_img("img < -3.2905", img=z_map)
+                        pos_mask = math_img(f"img > {threshold:.4f}", img=z_map)
+                        neg_mask = math_img(f"img < {-threshold:.4f}", img=z_map)
                         mean_right = apply_mask(bold_file, pos_mask).mean(axis=1)
                         mean_left = apply_mask(bold_file, neg_mask).mean(axis=1)
-                        std_right = apply_mask(bold_file, pos_mask).std(axis=1)
-                        std_left = apply_mask(bold_file, neg_mask).std(axis=1)
+
                         all_means_right.append({
                             "moco": moco_label,
                             "space": space,
                             "mean": mean_right,
-                            "std": std_right,
-                            "linestyle": linestyles[idx_moco % len(linestyles)],
-                            "space_style": space_styles[idx_space % len(space_styles)]
+                            "color": adjust_color_tone("red", moco_brightness[idx_moco]),
+                            "marker": markers[idx_moco % len(markers)],
+                            "linewidth": moco_widths[idx_moco]
                         })
                         all_means_left.append({
                             "moco": moco_label,
                             "space": space,
                             "mean": mean_left,
-                            "std": std_left, 
-                            "linestyle": linestyles[idx_moco % len(linestyles)],
-                            "space_style": space_styles[idx_space % len(space_styles)]
+                            "color": adjust_color_tone("blue", moco_brightness[idx_moco]*0.8),
+                            "marker": markers[idx_moco % len(markers)],
+                            "linewidth": moco_widths[idx_moco]
                         })
 
         # ----------------
-        # PLOT
+        # PLOT - RIGHT & LEFT ON SAME FIGURE
         # ----------------
-        plt.figure(figsize=(20, 12))
+        plt.figure(figsize=(25, 14))
         x = np.arange(n_scans)
 
-        # Click type legend (red/blue)
+        # Click type legend
         click_lines = [
-            plt.Line2D([0], [0], color="red", label="Right Click"),
-            plt.Line2D([0], [0], color="blue", label="Left Click")
+            plt.Line2D([0], [0], color="red", lw=3, label="Right Click"),
+            plt.Line2D([0], [0], color="blue", lw=3, label="Left Click")
         ]
 
-        # Motion correction legend (linestyle)
+        # Motion correction legend (markers)
         seen_moco = set()
-        strategy_lines = []
-        for item in all_means_right:
+        moco_lines = []
+        for idx, item in enumerate(all_means_right):
             if item["moco"] not in seen_moco:
-                strategy_lines.append(
-                    plt.Line2D([0], [0], color="black", linestyle=item["linestyle"], label=item["moco"])
+                moco_lines.append(
+                    plt.Line2D([0], [0], color="black", marker=markers[idx % len(markers)],
+                               lw=moco_widths[idx % len(moco_widths)], label=item["moco"], linestyle='-')
                 )
                 seen_moco.add(item["moco"])
 
         # Space legend (line style)
         seen_space = set()
         space_lines = []
-        for item in all_means_right:
+        for idx, item in enumerate(all_means_right):
             if item["space"] not in seen_space:
                 space_lines.append(
-                    plt.Line2D([0], [0], color="black", lw=2, linestyle=item["space_style"], label=item["space"])
+                    plt.Line2D([0], [0], color="black", lw=2,
+                               linestyle=line_styles[idx % len(line_styles)], label=item["space"])
                 )
                 seen_space.add(item["space"])
 
         # ----------------
-        # Plot Right clicks (red)
+        # Plot Right clicks
         # ----------------
         for item in all_means_right:
-            rest_idx = np.where(~task_vector_right)[0]
-            rest_idx = rest_idx[:7]
+            rest_idx = np.where(~task_vector_right)[0][:7]#[12:30]
             baseline = item["mean"][rest_idx].mean()
             percent_change = ((item["mean"][delay_volumes:] - baseline) / baseline) * 100
-            #plt.plot(x[delay_volumes:], percent_change,
-            #         color="red", linestyle=item["space_style"])
-            dispersion = (item["std"][delay_volumes:] / baseline) * 100  # <-- use std
-            plt.plot(x[delay_volumes:], percent_change,
-             color="red", linestyle=item["space_style"])
-            #plt.fill_between(x[delay_volumes:], percent_change - dispersion, percent_change + dispersion,
-            #         color="red", alpha=0.2)
+            plt.plot(
+                x[delay_volumes:], percent_change,
+                color=item["color"], marker=item["marker"], lw=item["linewidth"], alpha=0.9
+            )
+
         # ----------------
-        # Plot Left clicks (blue)
+        # Plot Left clicks (offset +10)
         # ----------------
         for item in all_means_left:
-            rest_idx = np.where(~task_vector_left)[0]
-            rest_idx = rest_idx[:7]
+            rest_idx = np.where(~task_vector_left)[0][:7]#[15:27]
             baseline = item["mean"][rest_idx].mean()
             percent_change = ((item["mean"][delay_volumes:] - baseline) / baseline) * 100
-            #plt.plot(x[delay_volumes:], percent_change + 10,
-            #         color="blue", linestyle=item["space_style"])
-            dispersion = (item["std"][delay_volumes:] / baseline) * 100  # <-- use std
-            plt.plot(x[delay_volumes:], percent_change + 10,
-             color="blue", linestyle=item["space_style"])
-            #plt.fill_between(x[delay_volumes:], percent_change + 10 - dispersion, percent_change + 10 + dispersion,
-            #         color="blue", alpha=0.2)
+            plt.plot(
+                x[delay_volumes:], percent_change + 10,
+                color=item["color"], marker=item["marker"], lw=item["linewidth"], alpha=0.9
+            )
 
         # Shaded task blocks
         ymin, ymax = plt.ylim()
         for start, end in consecutive_blocks(task_vector_right[delay_volumes:]):
-            plt.fill_between(range(start, end+1), ymin, ymax, color="red", alpha=0.5)
+            plt.fill_between(range(start, end+1), ymin, ymax, color="red", alpha=0.9)
         for start, end in consecutive_blocks(task_vector_left[delay_volumes:]):
-            plt.fill_between(range(start, end+1), ymin, ymax, color="blue", alpha=0.5)
+            plt.fill_between(range(start, end+1), ymin, ymax, color="blue", alpha=0.9)
 
         # Add legends
-#        plt.gca().add_artist(plt.legend(handles=strategy_lines, title="Motion Correction", loc="upper right"))
         plt.gca().add_artist(plt.legend(handles=space_lines, title="Space", loc="upper center"))
         plt.gca().add_artist(plt.legend(handles=click_lines, title="Click Type", loc="upper left"))
+        plt.gca().add_artist(plt.legend(handles=moco_lines, title="Motion Correction", loc="upper right"))
 
         plt.xlabel("Timepoint (fMRI Volume #)")
         plt.ylabel("% BOLD Signal Change")
-        #plt.xlim((0,160))
-        plt.title(f"% BOLD Change - Click Right vs Click Left\nsub-{subj:02}")
+        plt.title(f"% BOLD Change - Click Right vs Click Left - sub-{subj:02}", color=subj_color, fontweight='bold', )
         plt.grid(True)
+        plt.xlim(-1,160)
+        plt.ylim(-7,20)
         plt.tight_layout()
-        plt.savefig(os.path.join(FMRIPREP_PATH, 'figures',
+
+        # Save figure
+        out_dir = os.path.join(FMRIPREP_PATH, 'figures')
+        os.makedirs(out_dir, exist_ok=True)
+        plt.savefig(os.path.join(os.path.join(grp_dir,'figures'),
         f'sub-{subj:02}_ses-{ses}_tCNR_contrast-{contrast}.png'))
-        
         plt.show()

@@ -1,0 +1,152 @@
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from tristan_pipeline.utils.plotting_utils import *
+from tristan_pipeline.utils.analysis_utils import *
+from tristan_pipeline.io.params import *
+from nilearn.glm import threshold_stats_img
+
+
+space = "MNI152NLin2009cAsym"
+subject_z_values = {contrast: {subj: [] for subj in subjects} for contrast in contrasts_names}
+
+#################LOAD DATA PER SUBJECT / PER MOCO#################
+for subj in subjects:
+    for ses in sessions:
+        for contrast in contrasts_names:
+            subj_values = []
+            for m_idx, (data_dir_template, moco_label) in enumerate(datasets):
+                data_dir = data_dir_template.format(subj=subj)
+                FMRIPREP_PATH = os.path.join(data_dir, "derivatives", "fmriprep", "stat")
+                zmap_path = os.path.join(
+                    FMRIPREP_PATH,
+                    f"sub-{subj:02}_ses-{ses}_zmap_{contrast}_{space}_{moco_label}.nii"                )
+                if not os.path.exists(zmap_path):
+                    print(f"Missing file: {zmap_path}")
+                    subj_values.append(np.array([]))
+                    continue
+                img = nib.load(zmap_path)
+                img, threshold = threshold_stats_img(img,alpha=0.001,
+                    height_control='fpr',two_sided=True)
+                arr = img.get_fdata()
+                if contrast=="clic right vs clic left":
+                    arr_pos = arr[(arr > threshold) & np.isfinite(arr)]
+                    arr_neg = arr[(arr < -threshold) & np.isfinite(arr)]
+                    subj_values.append({"pos": arr_pos, "neg": arr_neg})
+                else: 
+                    arr = arr[(arr > threshold) & np.isfinite(arr)]
+                    subj_values.append({"pos": arr, "neg": np.array([])})
+            subject_z_values[contrast][subj] = subj_values
+
+for contrast in contrasts_names:
+    dual_polarity = (contrast == "clic right vs clic left")
+
+    # Larger figure if positive/negative
+    fig_size = (16, 8) if dual_polarity else (12, 6)
+    plt.figure(figsize=fig_size)
+
+    n_mocos = len(mocos)
+    cluster_spacing = 3.0
+    subject_offset = 0.6
+
+    # Build box positions and collect data
+    box_positions, all_values, all_colors, all_lw = [], [], [], []
+    for m_idx, moco_label in enumerate(mocos):
+        cluster_start = m_idx * cluster_spacing
+        for subj_idx, subj in enumerate(subjects):
+            subj_data = subject_z_values[contrast][subj][m_idx]
+            base_color = subject_colors[subj]
+            color_mod = adjust_color_tone(base_color, moco_brightness[m_idx])
+
+            # Positive side
+            pos_pos = cluster_start + subj_idx * subject_offset
+            box_positions.append(pos_pos)
+            all_values.append(subj_data["pos"])
+            all_colors.append(color_mod)
+            all_lw.append(moco_widths[m_idx])
+
+            if dual_polarity:
+                # Negative side
+                neg_pos = cluster_start + subj_idx * subject_offset + subject_offset - 0.6
+                box_positions.append(neg_pos)
+                all_values.append(subj_data["neg"])
+                all_colors.append(adjust_color_tone(base_color, moco_brightness[m_idx] * 0.7))
+                all_lw.append(moco_widths[m_idx])
+
+    # Plot boxplots
+    box = plt.boxplot(
+        all_values,
+        positions=box_positions,
+        widths=0.25,
+        patch_artist=True,
+        showfliers=False,
+        medianprops=dict(color='black', linewidth=2)
+    )
+    for patch, color, lw in zip(box['boxes'], all_colors, all_lw):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.7)
+        patch.set_linewidth(lw)
+
+    # Significance stars
+    for subj_idx, subj in enumerate(subjects):
+        subj_data = subject_z_values[contrast][subj]
+        if dual_polarity:
+            pos_data = [d["pos"] for d in subj_data]
+            neg_data = [d["neg"] for d in subj_data]
+            pos_stars = compute_stars(pos_data)
+            neg_data_abs = [np.abs(arr) for arr in neg_data]
+            neg_stars = compute_stars(neg_data_abs)
+
+            for m_idx, (p_star, n_star) in enumerate(zip(pos_stars, neg_stars)):
+                if p_star:
+                    pos = m_idx * cluster_spacing + subj_idx * subject_offset
+                    median_y = np.median(pos_data[m_idx]) if len(pos_data[m_idx]) > 0 else 0
+                    plt.text(pos, median_y + abs(median_y) * 0.05, p_star,
+                             ha='center', va='bottom', fontsize=12, fontweight='bold', color='black')
+                if n_star:
+                    pos = m_idx * cluster_spacing + subj_idx * subject_offset + subject_offset - 0.6
+                    median_y = np.median(neg_data[m_idx]) if len(neg_data[m_idx]) > 0 else 0
+                    plt.text(pos, median_y - abs(median_y) * 0.05, n_star,
+                             ha='center', va='top', fontsize=12, fontweight='bold', color='black')
+        else:
+            pos_data = [d["pos"] for d in subj_data]
+            stars = compute_stars(pos_data)
+            for m_idx, star in enumerate(stars):
+                if not star:
+                    continue
+                pos = m_idx * cluster_spacing + subj_idx * subject_offset
+                median_y = np.median(pos_data[m_idx]) if len(pos_data[m_idx]) > 0 else 0
+                plt.text(pos, median_y + abs(median_y) * 0.05, star,
+                         ha='center', va='bottom', fontsize=12, fontweight='bold', color='black')
+
+    # Reference lines
+    plt.axhline(3.0, color='gray', linestyle='--', linewidth=1, label=f'Z = +{threshold:.2f}')
+    if dual_polarity:
+        plt.axhline(-3.0, color='gray', linestyle='--', linewidth=1, label=f'Z = –{threshold:.2f}')
+
+    # Axis and layout
+    tick_positions = [
+        m_idx * cluster_spacing + (len(subjects) * subject_offset) / 2  for m_idx in range(n_mocos)
+    ]
+    plt.xticks(tick_positions, mocos, rotation=15)
+    plt.ylabel("Z-score")
+    plt.title(f"{contrast.capitalize()} — Subject-wise z-score distributions \n {space} \n (Significance vs. ONAVoffPEERSoff)", fontweight='bold')
+    plt.grid(True, alpha=0.3, linestyle='--')
+
+    # Legend
+    legend_elements = [
+        Line2D([0], [0], color=c, lw=3, label=f"sub-{subj:02}") for subj, c in subject_colors.items()
+    ]
+    if dual_polarity:
+        plt.legend(handles=legend_elements, title="Subjects", loc='center')
+    else:     
+        plt.legend(handles=legend_elements, title="Subjects", loc='upper right')
+
+    plt.tight_layout()
+    os.makedirs(os.path.join(grp_dir, 'figures'), exist_ok=True)
+    plt.savefig(
+        os.path.join(grp_dir, 'figures', f"boxplot_Z_{contrast.replace(' ', '_')}_space-{space}.png"),
+        dpi=300
+    )
+    plt.show()

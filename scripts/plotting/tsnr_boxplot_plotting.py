@@ -104,7 +104,7 @@ plt.title(f"Subject and Group-level tSNR Distributions - {space}\n(Significance 
 # legend
 legend_elements = [Line2D([0],[0], color=c, lw=3, label=f"sub-{subj:02}") for subj,c in subject_colors.items()]
 legend_elements.append(Line2D([0],[0], color='lightsalmon', lw=3, label='Group'))
-plt.legend(handles=legend_elements, title="Legend", loc='upper right')
+plt.legend(handles=legend_elements, title="Subjects", loc='upper right')
 plt.tight_layout()
 
 os.makedirs(os.path.join(grp_dir,'figures') ,exist_ok=True)
