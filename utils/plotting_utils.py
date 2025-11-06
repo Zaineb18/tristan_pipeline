@@ -4,7 +4,7 @@ import os
 import nibabel as nib 
 from nilearn.plotting import plot_stat_map
 from nilearn import datasets, surface, plotting,image 
-
+import matplotlib.colors as mcolors
 
 #####PLOTTING SETTINGS#####
 plt.rcParams.update({
@@ -15,6 +15,29 @@ plt.rcParams.update({
     'xtick.labelsize': 14,
     'ytick.labelsize': 14
 })
+line_styles = ['-', '--', ':']   # distinguish spaces
+# Subject base colors
+subject_colors = {
+    1: 'tab:blue',
+    2: 'tab:red',
+    3: 'tab:green',
+    4: 'tab:orange'
+}
+# Visual distinction for mocos
+markers = ['o', 's', '^']        # different markers per moco
+moco_widths = [1.5, 2.0, 2.5]    # progressively thicker
+moco_brightness = [2, 1.0, 0.7]  # lighter → darker
+
+
+###########FUNCTIONS#######################
+def adjust_color_tone(base_color, factor):
+    """Brighten or darken an RGB color by a factor."""
+    rgb = np.array(mcolors.to_rgb(base_color))
+    if factor > 1:  # lighten
+        rgb = 1 - (1 - rgb) / factor
+    else:  # darken
+        rgb = rgb * factor
+    return np.clip(rgb, 0, 1)
 
 def coord_plot11(mopa_pred_list, Y_names=None, TR=0.04, sub=0):
 

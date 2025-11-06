@@ -5,118 +5,112 @@ from matplotlib.lines import Line2D
 from tristan_pipeline.utils.loading_utils import *
 from tristan_pipeline.utils.preproc_utils import *
 from tristan_pipeline.utils.plotting_utils import *
-import pandas as pd 
 
-#################CONFIG#####################
-subjects = [1, 2, 3, 4]
-sessions = [1]
-space = "MNI152NLin2009cAsym"
-onav_files = {
-    1: "Y_B0_sent_2025-04-2311_47_37.753099.npy",
-    2: "Y_B0_sent_2025-05-2714_30_55.782043.npy", 
-    3: "Y_B0_sent_2025-09-0311-17-46.993207.npy", 
-    4: "Y_B0_sent_2025-06-1111_13_47.267598.npy"
-}
-d_vols = {1: 0, 2: 2, 3: 2, 4: 2}
-n_vols = {1: 153, 2: 155, 3: 155, 4: 155}
+onav_marker = 'D'
+onav_linewidth = 2.0
+onav_alpha = 0.3
+# ---------------------------------------
+for subj_idx, subj in enumerate(subjects):
+    plt.figure(figsize=(10, 6))
+    subj_color = subject_colors[subj]
 
-# Unique styles per subject
-colors = ['tab:blue', 'tab:red', 'tab:green', 'tab:orange']
-markers = ['o', 's', '^', '*']   # circle, square, triangle, star
-line_widths = [1.5, 1.5, 2.5, 2.5]
-alphas = [1.0, 1.0, 0.7, 0.5]
-#################CONFIG#####################
-plt.figure(figsize=(12, 6))
-
-for idx, subj in enumerate(subjects):
     for ses in sessions:
-        print(f"\nProcessing subject {subj}, session {ses}")
-        ##############fMRIPREP PATH##############
-        FMRIPREP_PATH = f"/home/zamor/Documents/TRISTAN/ismrm_dataset/sub-{subj:02d}/data_ONAVonPEERSon/derivatives/fmriprep"
-        FUNC_PATH, MASK_PATH, confounds_files, ANAT_PATH, GM_PATH,_,_, xfm_MNItoT1, xfm_T1toMNI = load_fmriprepdata(
-            FMRIPREP_PATH, subj, ses, space
-        )
-        bold_file = FUNC_PATH[0]
-        ##############LOAD CONFOUNDS##############
-        confounds, _ = load_confounds(
-            bold_file,
-            strategy=('motion', 'global_signal', 'compcor', 'high_pass'),
-            motion='power2',
-            global_signal='power2',
-            compcor="temporal_anat_combined",
-            n_compcor=4,
-            scrub=0
-        )
-        ##############fMRIPrep MOTION RESIDUALS##############
-        trans_y = confounds['trans_y'].values
-        fmriprep_rms_disp_y = np.sqrt(np.mean(trans_y**2))
-        fmriprep_mean_abs_disp_y = np.max(np.abs(trans_y))
-        trans_norm = np.sqrt(
-                confounds['trans_x']**2 +
-                confounds['trans_y']**2 +
-                confounds['trans_z']**2
-            )
-        plt.plot(
-            trans_y[d_vols[subj]:],
-            color=colors[idx],
-            linestyle='-',
-            marker=markers[idx],
-            markevery=20,       # place markers every 20 timepoints
-            linewidth=line_widths[idx], 
-            alpha=alphas[idx]
-        )
-        ###############ONAV MOTION ESTIMATES##############
-        motion_file = os.path.join(
-            f"/home/zamor/Documents/TRISTAN/ismrm_dataset/sub-{subj:02d}/onav_data",
-            onav_files[subj]
-        )
-        onav_mean_abs_disp_y, onav_rms_disp_y = None, None
+        # --- fMRIPrep motion estimates (3 mocos) ---
+        for m_idx, moco in enumerate(mocos):
+            FMRIPREP_PATH = os.path.join(base_dir, f"sub-{subj:02d}", f"data_{moco}", "derivatives", "fmriprep")
+
+            try:
+                FUNC_PATH, MASK_PATH, confounds_files, ANAT_PATH, GM_PATH,_,_, xfm_MNItoT1, xfm_T1toMNI = load_fmriprepdata(
+                    FMRIPREP_PATH, subj, ses, "MNI152NLin2009cAsym"
+                )
+                bold_file = FUNC_PATH[0]
+                confounds, _ = load_confounds(
+                    bold_file,
+                    strategy=('motion', 'global_signal', 'compcor', 'high_pass'),
+                    motion='power2',
+                    global_signal='power2',
+                    compcor="temporal_anat_combined",
+                    n_compcor=4,
+                    scrub=0
+                )
+
+                trans_norm = np.sqrt(confounds['trans_x']**2 +
+                                     confounds['trans_y']**2 +
+                                     confounds['trans_z']**2)
+
+                plt.plot(
+                    trans_norm,
+                    color=adjust_color_tone(subj_color, moco_brightness[m_idx]),
+                    linestyle='-',
+                    marker=markers[m_idx],
+                    markevery=20,
+                    linewidth=moco_widths[m_idx],
+                    alpha=0.9,
+                    label=f"{moco} (fMRIPrep)" if ses == sessions[0] else None
+                )
+            except Exception as e:
+                print(f"[WARN] Skipped sub-{subj:02d}, {moco}: {e}")
+                continue
+
+        # --- ONAV motion estimates ---
+        motion_file = os.path.join(base_dir, f"sub-{subj:02d}", "onav_data", onav_files[subj])
         if os.path.exists(motion_file):
             motion_reg, motion_labels = load_onav_reg(
                 filepath=motion_file,
                 labels=["Rx ", "Ry ", "Rz ", "x ", "y ", "z ", r"$\phi$ ", "f0 ", "G$_x$", "G$_y$", "G$_z$"],
                 y_labels=[" / °", " / °", " / °", " / mm", " / mm", " / mm", " / rad", " / Hz", " / µT/m", " / µT/m", "/ µT/m"]
             )
-            onav_trans_y = motion_reg[:, 4]
-            onav_mean_abs_disp_y = np.max(np.abs(onav_trans_y))
-            onav_rms_disp_y = np.sqrt(np.mean(onav_trans_y**2))
-            onav_trans_norm = np.sqrt(
-                    motion_reg[:, 3]**2 +
-                    motion_reg[:, 4]**2 +
-                    motion_reg[:, 5]**2
-                )
+
+            onav_trans_norm = np.sqrt(motion_reg[:, 3]**2 +
+                                      motion_reg[:, 4]**2 +
+                                      motion_reg[:, 5]**2)
+
             plt.plot(
-                onav_trans_y[d_vols[subj]:],
-                color=colors[idx],
+                onav_trans_norm,
+                color=adjust_color_tone(subj_color,onav_alpha),
                 linestyle='--',
-                marker=markers[idx],
+                marker=onav_marker,
                 markevery=20,
-                linewidth=line_widths[idx],
-                alpha=alphas[idx]
+                linewidth=onav_linewidth,
+                label="ONAV" if ses == sessions[0] else None
             )
+        else:
+            print(f"[WARN] Missing ONAV file: {motion_file}")
 
-##############PLOTTING##############
-#plt.ylabel('Translation Y (mm)')
-plt.xlabel("Timepoint (fMRI Volume #)")
-#plt.title('Translation Y: fMRIPrep vs ONAV (all subjects)')
-plt.ylabel('Translation Y (mm)')
-plt.title('Translation Y: fMRIPrep vs ONAV (all subjects)')
-plt.ylim((-0.2, 0.2))
-plt.xlim((0,160))
-##############TWO LEGENDS##############
-# Legend 1: subjects (colors + markers)
-subject_handles = [Line2D([0], [0], color=colors[i], lw=1.0, marker=markers[i]) for i in range(len(subjects))]
-subject_labels = [f"sub-{s:02d}" for s in subjects]
-leg1 = plt.legend(subject_handles, subject_labels, title="Subjects",loc="upper left", 
-                  bbox_to_anchor=(0.15, 1.0))
-# Legend 2: estimate types (solid = fMRIPrep, dashed = ONAV)
-style_handles = [
-    Line2D([0], [0], color="black", lw=0.8, linestyle='-'),
-    Line2D([0], [0], color="black", lw=0.8, linestyle='--')
-]
-style_labels = ["fMRIPrep", "ONAV"]
-leg2 = plt.legend(style_handles, style_labels, title="Estimates", loc="upper left")
-plt.gca().add_artist(leg1)
-plt.tight_layout()
-plt.show()
+    # --- Formatting ---
+    plt.xlabel("Timepoint (fMRI Volume #)")
+    plt.ylabel("Translation L2 norm (mm)")
+    plt.title(f"fMRIPrep vs ONAV motion estimates - sub-{subj:02d}", color=subj_color, fontweight='bold')
+    plt.ylim(0, 0.85)
+    plt.xlim(-1, 160)
+    plt.grid(True, linestyle='--', alpha=0.3)
 
+    # --- Legends ---
+    moco_legend = [
+        Line2D([0], [0],
+               color=adjust_color_tone(subj_color, moco_brightness[i]),
+               lw=moco_widths[i],
+               linestyle='-',
+               marker=markers[i],
+               markersize=6,
+               label=m)
+        for i, m in enumerate(mocos)
+    ]
+    onav_legend = [
+        Line2D([0], [0],
+               color=adjust_color_tone(subj_color,onav_alpha),
+               lw=onav_linewidth,
+               linestyle='--',
+               marker=onav_marker,
+               markersize=6,
+               label='ONAV')
+    ]
+
+    first_legend = plt.legend(handles=moco_legend, title="fMRIPrep motion corrections", loc="upper right")
+    plt.gca().add_artist(first_legend)
+    plt.legend(handles=onav_legend, title="ONAV estimate", loc="upper center")
+    plt.tight_layout()
+    os.makedirs(os.path.join(grp_dir,'figures') ,exist_ok=True)
+    plt.savefig(os.path.join(grp_dir,'figures',f"sub-{subj:02}_ses-{ses}_MotionEst.png"))
+
+    plt.show()

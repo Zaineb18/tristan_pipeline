@@ -3,7 +3,8 @@ import numpy as np
 import nibabel as nib
 from scipy.ndimage import binary_dilation
 from nilearn import image 
-
+from scipy.stats import mannwhitneyu
+from statsmodels.stats.multitest import multipletests
 def consecutive_blocks(task_vector):
     blocks = []
     in_block = False
@@ -89,3 +90,40 @@ def make_tissues(wm, gm, csf, min_thresh=0.7):
     gm_csf_interface = (gm_shell & csf_shell) #| (ambiguous & (gm_shell | csf_shell))
     ambiguous = ambiguous & (~wm_core) & (~gm_core) & (~csf_core)  & (~wm_shell) & (~gm_shell) & (~csf_shell) & (~gm_wm_interface) & (~gm_csf_interface)
     return(wm_core, gm_core, csf_core, gm_wm_interface, gm_csf_interface, ambiguous)
+
+def compute_stars(values_list):
+    baseline_data = values_list[0]
+    p_values = [np.nan]
+    for data in values_list[1:]:
+        if len(baseline_data) == 0 or len(data) == 0:
+            p_values.append(np.nan)
+            continue
+        stat, p = mannwhitneyu(baseline_data, data, alternative='two-sided')
+        p_values.append(p)
+    # Bonferroni correction
+    _, p_corrected, _, _ = multipletests(p_values[1:], method='bonferroni')
+    p_corrected = [np.nan] + list(p_corrected)
+    # assign stars
+    stars = []
+    baseline_median = np.median(baseline_data) if len(baseline_data) > 0 else np.nan
+    for vals, p in zip(values_list, p_corrected):
+        if np.isnan(p):
+            stars.append("")
+            continue
+        if p < 0.001:
+            star = "***"
+        elif p < 0.01:
+            star = "**"
+        elif p < 0.05:
+            star = "*"
+        else:
+            star = ""
+        # add arrow
+        if star:
+            current_median = np.median(vals)
+            if current_median > baseline_median:
+                star += "↑"
+            elif current_median < baseline_median:
+                star += "↓"
+        stars.append(star)
+    return stars

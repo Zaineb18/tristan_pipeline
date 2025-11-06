@@ -10,19 +10,8 @@ import nibabel as nib
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
-##########CONFIG###########
-mocos = ["ONAVonPEERSon"]
 spaces = ["T1w"]
-subjects = [1, 2, 3, 4]
-sessions = [1]
-# Unique styles per subject
-colors = ['tab:blue', 'tab:red', 'tab:green', 'tab:orange']
-markers = ['o', 's', '^', '*']
-alphas = [1.0, 1.0, 0.7, 0.5]
-##########CONFIG###########
-#######INITIALIZE COMBINED DATAFRAME 
-#Initialize combined DataFrame for all subjects
-combined_tsnr_df = pd.DataFrame(columns=['Subject', 'Tissue', 'tSNR'])
+combined_tsnr_df = pd.DataFrame(columns=['Subject', 'Tissue', 'tSNR', 'moco'])
 
 for subj_idx, subj in enumerate(subjects):
     for ses in sessions:
@@ -50,35 +39,62 @@ for subj_idx, subj in enumerate(subjects):
                 gm_csf_interface = gm_csf_interface.astype(bool)
 
 
-                display_tissues(gm_core, wm_core, csf_core,
-                    gm_wm_interface, gm_csf_interface,
-                    nib.load(tsnr_file).affine, t1_img_res, title="Tissues and Interfaces")
+                #display_tissues(gm_core, wm_core, csf_core,
+                #gm_wm_interface, gm_csf_interface,
+                #nib.load(tsnr_file).affine, t1_img_res, title="Tissues and Interfaces")
                 
                 
                 # Extract voxel-wise tSNR values
                 tsnr_values = {
                     "GM": tsnr_data[gm_core],
                     "WM": tsnr_data[wm_core],
-                    #"CSF": tsnr_data[csf_core],
-                    "GM/WM interface": tsnr_data[gm_wm_interface],
-                    #"Pial surface": tsnr_data[gm_csf_interface],
+
                 }
+
                 # Convert to long-format DataFrame for seaborn
                 tsnr_long = []
                 for tissue, values in tsnr_values.items():
                     for v in values:
-                        tsnr_long.append({'Subject': f"sub-{subj:02}", 'Tissue': tissue, 'tSNR': v})
+                        tsnr_long.append({'Subject': f"{subj}", 'Tissue': tissue, 'tSNR': v, 'moco': moco})
                 tsnr_df = pd.DataFrame(tsnr_long)
                 # Append to combined DataFrame
                 combined_tsnr_df = pd.concat([combined_tsnr_df, tsnr_df], ignore_index=True)
 
 # ----------------- Combined Violin Plot -----------------
 plt.figure(figsize=(14, 6))
-sns.violinplot(x='Tissue', y='tSNR', hue='Subject', data=combined_tsnr_df, palette=colors, inner='quartile')
+sns.violinplot(x='Tissue', y='tSNR', hue='Subject', data=combined_tsnr_df,
+                palette=subject_colors, inner='quartile')
 plt.title("Temporal SNR distribution (all subjects)", size=20)
 plt.ylabel("tSNR")
 plt.xticks(rotation=30)
 plt.grid(axis='y', linestyle='--', alpha=0.5)
 plt.legend(title="Subject")
+plt.tight_layout()
+plt.show()
+
+combined_tsnr_df['Subject'] = combined_tsnr_df['Subject'].astype(int)
+g = sns.catplot(
+    data=combined_tsnr_df,
+    x='Tissue',
+    y='tSNR',
+    hue='Subject',
+    col='moco',                # facet per motion correction
+    palette=subject_colors,
+    kind='violin',
+    inner='quartile',
+    height=6,
+    aspect=1
+)
+
+g.set_titles("{col_name}")       # show moco label as subplot title
+g.set_axis_labels("Tissue", "tSNR")
+g.set(ylim=(0, None))           # optional, can fix y-axis if needed
+for ax in g.axes.flat:
+    ax.grid(axis='y', linestyle='--', alpha=0.3)
+    ax.tick_params(axis='x', rotation=30)
+
+# Adjust legend
+g._legend.set_title("Subject")
+
 plt.tight_layout()
 plt.show()

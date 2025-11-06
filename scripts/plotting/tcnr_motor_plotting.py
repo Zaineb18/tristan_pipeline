@@ -33,25 +33,7 @@ n_vols = {1:153, 2:155, 3:155, 4:155}
 trs = {1:2.12, 2:2.12, 3:2.16, 4:2.12}
 linestyles = ['-', '--', 'dashdot', ':']  # differentiate mocos if multiple
 base_dir = "/home/zamor/Documents/TRISTAN/ismrm_dataset"
-#stimfile = "/home/zamor/nasShare/INM-GlobalShare/Boulantetal_Tristan_2025/stimfiles/session1_localizer_standard.csv"
-
-
-
-base_dir = "/home/zamor/Documents/TRISTAN/data_Caro/"
-linestyles = ['-', '--', 'dashdot', ':']  # differentiate mocos if multiple
-stimfile = "/home/zamor/Documents/TRISTAN/data_Caro/session1_localizer_standard.csv"
-contrasts_names = ['calculations','checkerboard vs the others','clic right vs clic left']
-mocos = [
-    ("NA", 'tab:red')
-]
-spaces = ["MNI152NLin2009cAsym", "T1w"]
-space_styles = ['-', '--', ':']  # assign one per space
-contrasts = ["clic right vs clic left"]
-subjects = [1,2,3]
-sessions = [1]
-d_vols= {1:0, 2:0, 3:0, 4:0}
-n_vols = {1:263, 2:263, 3:263, 4:263}
-trs= {1:1.2, 2:1.2, 3:1.2, 4:1.2}
+stimfile = "/home/zamor/nasShare/INM-GlobalShare/Boulantetal_Tristan_2025/stimfiles/session1_localizer_standard.csv"
 
 # ----------------
 # LOOP OVER SUBJECTS
@@ -62,7 +44,7 @@ for subj in subjects:
         delay_volumes = d_vols[subj]
         tr = trs[subj]
 
-        #stimfile = "/home/zamor/nasShare/INM-GlobalShare/Boulantetal_Tristan_2025/stimfiles/session1_localizer_standard.csv"
+        stimfile = "/home/zamor/nasShare/INM-GlobalShare/Boulantetal_Tristan_2025/stimfiles/session1_localizer_standard.csv"
         events, task_vector_right, task_vector_left, task_vector_calc = events_task_vectors(
             stimfile, n_scans=n_scans, delay_volumes=delay_volumes, tr=tr
         )
@@ -73,9 +55,9 @@ for subj in subjects:
         # LOAD DATA
         # ----------------
         for idx_moco, (moco_label, _) in enumerate(mocos):
-            #data_dir = f"{base_dir}/sub-{subj:02}/data_{moco_label}"
-            #FMRIPREP_PATH = os.path.join(data_dir, "derivatives", "fmriprep")
-            FMRIPREP_PATH = os.path.join(base_dir, "derivatives", "fmriprep")
+            data_dir = f"{base_dir}/sub-{subj:02}/data_{moco_label}"
+            FMRIPREP_PATH = os.path.join(data_dir, "derivatives", "fmriprep")
+            #FMRIPREP_PATH = os.path.join(base_dir, "derivatives", "fmriprep")
 
             for idx_space, space in enumerate(spaces):
                 FUNC_PATH, MASK_PATH, confounds_files, ANAT_PATH, GM_PATH,WM_PATH,CSF_PATH,xfm_MNItoT1, xfm_T1toMNI = load_fmriprepdata(
@@ -192,15 +174,17 @@ for subj in subjects:
             plt.fill_between(range(start, end+1), ymin, ymax, color="blue", alpha=0.5)
 
         # Add legends
-        plt.gca().add_artist(plt.legend(handles=strategy_lines, title="Motion Correction", loc="upper right"))
+#        plt.gca().add_artist(plt.legend(handles=strategy_lines, title="Motion Correction", loc="upper right"))
         plt.gca().add_artist(plt.legend(handles=space_lines, title="Space", loc="upper center"))
         plt.gca().add_artist(plt.legend(handles=click_lines, title="Click Type", loc="upper left"))
 
-        plt.xlabel("Volumes")
+        plt.xlabel("Timepoint (fMRI Volume #)")
         plt.ylabel("% BOLD Signal Change")
+        #plt.xlim((0,160))
         plt.title(f"% BOLD Change - Click Right vs Click Left\nsub-{subj:02}")
         plt.grid(True)
         plt.tight_layout()
         plt.savefig(os.path.join(FMRIPREP_PATH, 'figures',
         f'sub-{subj:02}_ses-{ses}_tCNR_contrast-{contrast}.png'))
+        
         plt.show()
