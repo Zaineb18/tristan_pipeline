@@ -5,14 +5,15 @@ from matplotlib.lines import Line2D
 from tristan_pipeline.utils.plotting_utils import *
 from tristan_pipeline.io.params import *
 spaces = ["MNI152NLin2009cAsym", "T1w", "native bold"]
-
+mocos_ = ["SNAVoffPEERSoff", 
+         "SNAVonPEERSon"]
 for subj in subjects:
     for ses in sessions:
         plt.figure(figsize=(10, 6))
         subj_color = subject_colors.get(subj, 'black')
 
         # Plot each moco × space combination
-        for moco_label, marker, m_lw, bright_factor in zip(mocos, markers, moco_widths, moco_brightness):
+        for moco_label, moco_, marker, m_lw, bright_factor in zip(mocos, mocos_, markers, moco_widths, moco_brightness):
             moco_color = adjust_color_tone(subj_color, bright_factor)
 
             for space, ls in zip(spaces, line_styles):
@@ -56,7 +57,7 @@ for subj in subjects:
                    lw=lw,
                    markersize=6,
                    label=ml)
-            for ml, m, bright, lw in zip(mocos, markers, moco_brightness, moco_widths)
+            for ml, m, bright, lw in zip(mocos_, markers, moco_brightness, moco_widths)
         ]
         space_legend = [
             Line2D([0], [0], color='black', lw=2, ls=ls, label=sp)

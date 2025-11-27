@@ -12,7 +12,7 @@ def update(frame):
         group_imgs[frame],
         axes=ax,
         threshold=0.0,
-        vmax=150,
+        vmax=130,
         display_mode='ortho',
         cut_coords=(0,0,0),
         colorbar=True,

@@ -9,6 +9,8 @@ from tristan_pipeline.utils.plotting_utils import *
 onav_marker = 'D'
 onav_linewidth = 2.0
 onav_alpha = 0.3
+mocos_ = ["SNAVoffPEERSoff", 
+         "SNAVonPEERSon"]
 # ---------------------------------------
 for subj_idx, subj in enumerate(subjects):
     plt.figure(figsize=(10, 6))
@@ -94,7 +96,7 @@ for subj_idx, subj in enumerate(subjects):
                marker=markers[i],
                markersize=6,
                label=m)
-        for i, m in enumerate(mocos)
+        for i, m in enumerate(mocos_)
     ]
     onav_legend = [
         Line2D([0], [0],
@@ -103,12 +105,12 @@ for subj_idx, subj in enumerate(subjects):
                linestyle='--',
                marker=onav_marker,
                markersize=6,
-               label='ONAV')
+               label='SNAV')
     ]
 
     first_legend = plt.legend(handles=moco_legend, title="fMRIPrep estimates", loc="upper right")
     plt.gca().add_artist(first_legend)
-    plt.legend(handles=onav_legend, title="ONAV estimate", loc="upper center")
+    plt.legend(handles=onav_legend, title="SNAV estimates", loc="upper center")
     plt.tight_layout()
     os.makedirs(os.path.join(grp_dir,'figures') ,exist_ok=True)
     plt.savefig(os.path.join(grp_dir,'figures',f"sub-{subj:02}_ses-{ses}_MotionEst.png"))

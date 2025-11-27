@@ -9,6 +9,8 @@ from nilearn.glm import threshold_stats_img
 
 
 space = "MNI152NLin2009cAsym"
+mocos_ = ["SNAVoffPEERSoff", 
+         "SNAVonPEERSon"]
 subject_z_values = {contrast: {subj: [] for subj in subjects} for contrast in contrasts_names}
 
 #################LOAD DATA PER SUBJECT / PER MOCO#################
@@ -94,9 +96,23 @@ for contrast in contrasts_names:
         if dual_polarity:
             pos_data = [d["pos"] for d in subj_data]
             neg_data = [d["neg"] for d in subj_data]
-            pos_stars = compute_stars(pos_data)
+            pos_stars, pos_pvalues, pos_pvalues_corr, pos_uvalues, pos_esvalues = compute_stars(pos_data)
             neg_data_abs = [np.abs(arr) for arr in neg_data]
-            neg_stars = compute_stars(neg_data_abs)
+            neg_stars, neg_pvalues, neg_pvalues_corr, neg_uvalues, neg_esvalues = compute_stars(neg_data_abs)
+            
+            print(contrast)
+            print('subject', subj)
+            print('stars_pos', pos_stars)
+            print('pvalues_pos', pos_pvalues)
+            print('pvalues_corr_pos', pos_pvalues_corr)
+            print('uvalues_pos', pos_uvalues)
+            print('effect size_pos', pos_esvalues)
+
+            print('stars_neg', neg_stars)
+            print('pvalues_neg', neg_pvalues)
+            print('pvalues_corr_neg', neg_pvalues_corr)
+            print('uvalues_neg', neg_uvalues)
+            print('effect size_neg', neg_esvalues)            
 
             for m_idx, (p_star, n_star) in enumerate(zip(pos_stars, neg_stars)):
                 if p_star:
@@ -111,7 +127,15 @@ for contrast in contrasts_names:
                              ha='center', va='top', fontsize=12, fontweight='bold', color='black')
         else:
             pos_data = [d["pos"] for d in subj_data]
-            stars = compute_stars(pos_data)
+            stars, pvalues, pvalues_corr, uvalues, esvalues = compute_stars(pos_data)
+            
+            print('subject', subj)
+            print('stars', stars)
+            print('pvalues', pvalues)
+            print('pvalues_corr', pvalues_corr)
+            print('uvalues', uvalues)
+            print('effect size', esvalues)
+
             for m_idx, star in enumerate(stars):
                 if not star:
                     continue
@@ -129,9 +153,9 @@ for contrast in contrasts_names:
     tick_positions = [
         m_idx * cluster_spacing + (len(subjects) * subject_offset) / 2  for m_idx in range(n_mocos)
     ]
-    plt.xticks(tick_positions, mocos, rotation=15)
-    plt.ylabel("Z-score")
-    plt.title(f"{contrast.capitalize()} — Subject-wise z-score distributions \n {space} \n (Significance vs. ONAVoffPEERSoff)", fontweight='bold')
+    plt.xticks(tick_positions, mocos_, rotation=15)
+    plt.ylabel("z-score")
+    plt.title(f"{contrast.capitalize()} — Subject-wise z-score distributions \n {space} \n (Significance vs. SNAVoffPEERSoff)", fontweight='bold')
     plt.grid(True, alpha=0.3, linestyle='--')
 
     # Legend
@@ -139,9 +163,9 @@ for contrast in contrasts_names:
         Line2D([0], [0], color=c, lw=3, label=f"sub-{subj:02}") for subj, c in subject_colors.items()
     ]
     if dual_polarity:
-        plt.legend(handles=legend_elements, title="Subjects", loc='center')
+        plt.legend(handles=legend_elements, loc='center')
     else:     
-        plt.legend(handles=legend_elements, title="Subjects", loc='upper right')
+        plt.legend(handles=legend_elements, loc='upper right')
 
     plt.tight_layout()
     os.makedirs(os.path.join(grp_dir, 'figures'), exist_ok=True)

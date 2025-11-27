@@ -8,7 +8,7 @@ from tristan_pipeline.io.params import *
 from tristan_pipeline.utils.loading_utils import *
 from tristan_pipeline.utils.preproc_utils import *
 from tristan_pipeline.utils.glm_utils import *
-#spaces = ["MNI152NLin2009cAsym", "T1w", "native bold"]
+spaces = ["MNI152NLin2009cAsym", "T1w", "native bold"]
 for subj in subjects:
     for ses in sessions:
         for moco in mocos: 
@@ -43,8 +43,8 @@ for subj in subjects:
                     mean_bold = image.mean_img(image.index_img(bold_file, slice(10, None)))
                     tsnr_img = image.math_img("img * (img > 0)", img=tsnr_img)
 
-                    disp = plotting.plot_stat_map(tsnr_img, bg_img=mean_bold, threshold=0, vmax=150,
-                    title=f"tSNR after task and drifts regression ({moco} - {space})",
+                    disp = plotting.plot_stat_map(tsnr_img, bg_img=mean_bold, threshold=0, vmax=130,
+                    title=f"tSNR after task and drifts regression (sub-{subj:02} - {moco} - {space})",
                     display_mode='z',
                     cut_coords=(-15,-10,-5,4,17,29,36,44,52), annotate=False,colorbar=False, 
                             symmetric_cbar=False,)

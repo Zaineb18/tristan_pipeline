@@ -94,12 +94,20 @@ def make_tissues(wm, gm, csf, min_thresh=0.7):
 def compute_stars(values_list):
     baseline_data = values_list[0]
     p_values = [np.nan]
+    stats_values = [np.nan] # U statistics
+    effect_sizes = [np.nan]           
     for data in values_list[1:]:
         if len(baseline_data) == 0 or len(data) == 0:
             p_values.append(np.nan)
+            stats_values.append(np.nan)
             continue
         stat, p = mannwhitneyu(baseline_data, data, alternative='two-sided')
         p_values.append(p)
+        stats_values.append(stat)
+
+        n1, n2 = len(baseline_data), len(data)
+        r_rb = 1 - (2 * stat) / (n1 * n2)
+        effect_sizes.append(r_rb)       
     # Bonferroni correction
     _, p_corrected, _, _ = multipletests(p_values[1:], method='bonferroni')
     p_corrected = [np.nan] + list(p_corrected)
@@ -126,4 +134,4 @@ def compute_stars(values_list):
             elif current_median < baseline_median:
                 star += "↓"
         stars.append(star)
-    return stars
+    return stars, p_values, p_corrected, stats_values, effect_sizes

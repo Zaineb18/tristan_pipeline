@@ -8,10 +8,11 @@ import pandas as pd
 from nilearn import image 
 from nilearn.glm import threshold_stats_img
 import ants
-
+mocos_ = ["SNAVoffPEERSoff", 
+         "SNAVonPEERSon"]
 for subj in subjects: 
     for ses in sessions: 
-        for moco in mocos:
+        for moco,moco_ in zip(mocos, mocos_):
             ###########READ FMRIPREP FILES AND MOTION FILES###########
             DATA_DIR = f"/home/zamor/Documents/TRISTAN/ismrm_dataset/sub-{subj:02}/data_{moco}"
             #DATA_DIR = f"/home/zamor/Documents/TRISTAN/data_Caro"
@@ -41,7 +42,8 @@ for subj in subjects:
                 ###########MAKE CONTRASTS VECTORS###########
                 contrasts = custom_contrast(design_matrix.keys())
                 ###########CUT COORDS###########
-                cut_coords = [(30,39,42,54),(4,12,20,24),(50,52,58,60)]
+                cut_coords = [(30,39,42,54),(50,52,58,60),(4,12,20,24),(5,13,15,25)]
+
                 if space == "T1w":
                     xfm = ants.read_transform(xfm_T1toMNI_file)
                     fixed_x, fixed_y = 0, 0  # Dummy fixed x,y for transformation
@@ -62,11 +64,11 @@ for subj in subjects:
                     ###########FPR at 0.001###########
                     thresholded_map, threshold = threshold_stats_img(z_map,alpha=0.001,
                     height_control='fpr',two_sided=True)
-                    plot_activations(z_map, anat_file, gm_file, threshold, contrast, moco, space, cut_coords[i], subj, ses, FMRIPREP_PATH, thresh_strag='fpr')            
+                    plot_activations(z_map, anat_file, gm_file, threshold, contrast, moco_, space, cut_coords[i], subj, ses, FMRIPREP_PATH, thresh_strag='fpr')            
                     ###########FDR at 0.05###########
-                    thresholded_map, threshold = threshold_stats_img(z_map,alpha=0.05,
-                    height_control='fdr', two_sided=True)
-                    plot_activations(z_map, anat_file, gm_file, threshold, contrast, moco, space, cut_coords[i], subj, ses, FMRIPREP_PATH, thresh_strag='fdr')
+                    #thresholded_map, threshold = threshold_stats_img(z_map,alpha=0.05,
+                    #height_control='fdr', two_sided=True)
+                    #plot_activations(z_map, anat_file, gm_file, threshold, contrast, moco_, space, cut_coords[i], subj, ses, FMRIPREP_PATH, thresh_strag='fdr')
                     ###########Surface-based visualization###########
                     disp_surf_activations(space, z_map, FREESURFER_PATH,FMRIPREP_PATH, contrast, moco, subj, ses )
                     i=i+1

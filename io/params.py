@@ -6,12 +6,15 @@ RAW_PATH = os.path.join(GLOB_DIR, 'rawdata')
 
 stimfile = "/home/zamor/nasShare/INM-GlobalShare/Boulantetal_Tristan_2025/stimfiles/session1_localizer_standard.csv"
 #stimfile = "/home/zamor/Documents/TRISTAN/data_Caro/session1_localizer_standard.csv"
-contrasts_names = ['calculations','checkerboard vs the others','clic right vs clic left']
+contrasts_names = ['calculations','clic right vs clic left', 'checkerboard', 'phrases']
 mocos = ["ONAVoffPEERSoff", 
-         "ONAVonPEERSoff", 
+         #"ONAVonPEERSoff", 
          "ONAVonPEERSon"]
+
 spaces = ["MNI152NLin2009cAsym", "T1w"]
-onav = {"ONAVoffPEERSoff":False, "ONAVonPEERSoff":True, "ONAVonPEERSon":True}
+onav = {"ONAVoffPEERSoff":False,
+        #"ONAVonPEERSoff":True,
+        "ONAVonPEERSon":True}
 subjects = [1,2,3,4]
 sessions = [1]
 onav_files = {1:"Y_B0_sent_2025-04-2311_47_37.753099.npy",
@@ -26,7 +29,7 @@ min_onsets= {1:0, 2:0, 3:0, 4:0}
 base_dir = "/home/zamor/Documents/TRISTAN/ismrm_dataset"
 datasets = [
     (os.path.join(base_dir, "sub-{subj:02}", "data_ONAVoffPEERSoff"), "ONAVoffPEERSoff"),
-    (os.path.join(base_dir, "sub-{subj:02}", "data_ONAVonPEERSoff"), "ONAVonPEERSoff"),
+    #(os.path.join(base_dir, "sub-{subj:02}", "data_ONAVonPEERSoff"), "ONAVonPEERSoff"),
     (os.path.join(base_dir, "sub-{subj:02}", "data_ONAVonPEERSon"), "ONAVonPEERSon")
 ]
 grp_dir = os.path.join(base_dir,"grp_output")

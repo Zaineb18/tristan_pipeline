@@ -53,6 +53,10 @@ def custom_contrast(design_matrix_columns):
                  'phrases vs checkerboard': elem_contrast['phraseVideo'] - elem_contrast['CboardH'] - elem_contrast['CboardV'],
                  'calculations vs clic': elem_contrast['calculvideo'] - elem_contrast['clicDvideo'] - elem_contrast['clicGvideo'],
                  'phrases vs clic': elem_contrast['phraseVideo'] - elem_contrast['clicDvideo'] - elem_contrast['clicGvideo'],
+                 'checkerboard': elem_contrast['CboardH']+elem_contrast['CboardV'],
+                 'phrases vs calculations':  elem_contrast['phraseVideo'] - elem_contrast['calculvideo'],
+                 'phrases':elem_contrast['phraseVideo'],
+                 
                  }
     return contrasts
 
