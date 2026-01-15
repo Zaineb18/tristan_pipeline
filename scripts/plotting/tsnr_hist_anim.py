@@ -14,13 +14,12 @@ for subj in subjects:
         subj_color = subject_colors.get(subj, 'black')
         ########LOAD DATA########
         lines_data = []
-        for moco_label, marker, m_lw, bright_factor in zip(mocos, markers, moco_widths, moco_brightness):
+        for moco_label, marker, m_lw, bright_factor in zip(list(mocos.keys()), markers, moco_widths, moco_brightness):
             moco_color = adjust_color_tone(subj_color, bright_factor)
             for space, ls in zip(spaces, line_styles):
-                data_dir = f"{base_dir}/sub-{subj:02}/data_{moco_label}"
-                FMRIPREP_PATH = os.path.join(data_dir, 'derivatives', 'fmriprep')
+                FMRIPREP_PATH =os.path.join(DATA_DIR, 'derivatives', 'fmriprep')
                 tsnr_file = os.path.join(
-                    FMRIPREP_PATH, 'stat',
+                    FMRIPREP_PATH,f'sub-{subj:02}',f'ses-{ses}', 'stats',
                     f"sub-{subj:02}_ses-{ses}_tSNRmap_space-{space}_{moco_label}.npy"
                 )
 

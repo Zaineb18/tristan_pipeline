@@ -8,7 +8,7 @@ from tristan_pipeline.io.params import *
 from nilearn.glm import threshold_stats_img
 
 
-space = "MNI152NLin2009cAsym"
+space = "T1w"
 mocos_ = ["SNAVoffPEERSoff", 
          "SNAVonPEERSon"]
 subject_z_values = {contrast: {subj: [] for subj in subjects} for contrast in contrasts_names}
@@ -16,14 +16,13 @@ subject_z_values = {contrast: {subj: [] for subj in subjects} for contrast in co
 #################LOAD DATA PER SUBJECT / PER MOCO#################
 for subj in subjects:
     for ses in sessions:
+        FMRIPREP_PATH =os.path.join(DATA_DIR, 'derivatives', 'fmriprep')
         for contrast in contrasts_names:
             subj_values = []
-            for m_idx, (data_dir_template, moco_label) in enumerate(datasets):
-                data_dir = data_dir_template.format(subj=subj)
-                FMRIPREP_PATH = os.path.join(data_dir, "derivatives", "fmriprep", "stat")
+            for moco in list(mocos.keys()):
                 zmap_path = os.path.join(
-                    FMRIPREP_PATH,
-                    f"sub-{subj:02}_ses-{ses}_zmap_{contrast}_{space}_{moco_label}.nii"                )
+                    FMRIPREP_PATH,f'sub-{subj:02}',f'ses-{ses}','stats',
+                    f"sub-{subj:02}_ses-{ses}_zmap_{contrast}_{space}_{moco}.nii"                )
                 if not os.path.exists(zmap_path):
                     print(f"Missing file: {zmap_path}")
                     subj_values.append(np.array([]))
@@ -45,7 +44,7 @@ for contrast in contrasts_names:
     dual_polarity = (contrast == "clic right vs clic left")
 
     # Larger figure if positive/negative
-    fig_size = (16, 8) if dual_polarity else (12, 6)
+    fig_size = (12, 6) if dual_polarity else (12, 3)
     plt.figure(figsize=fig_size)
 
     n_mocos = len(mocos)
@@ -155,7 +154,7 @@ for contrast in contrasts_names:
     ]
     plt.xticks(tick_positions, mocos_, rotation=15)
     plt.ylabel("z-score")
-    plt.title(f"{contrast.capitalize()} — Subject-wise z-score distributions \n {space} \n (Significance vs. SNAVoffPEERSoff)", fontweight='bold')
+    plt.title(f"{contrast.capitalize()} — Subject-wise z-score distributions - {space} \n (Significance vs. SNAVoffPEERSoff)", fontweight='bold', fontsize=12)
     plt.grid(True, alpha=0.3, linestyle='--')
 
     # Legend
@@ -163,14 +162,14 @@ for contrast in contrasts_names:
         Line2D([0], [0], color=c, lw=3, label=f"sub-{subj:02}") for subj, c in subject_colors.items()
     ]
     if dual_polarity:
-        plt.legend(handles=legend_elements, loc='center')
+        plt.legend(handles=legend_elements, loc='center', fontsize=12)
     else:     
-        plt.legend(handles=legend_elements, loc='upper right')
+        plt.legend(handles=legend_elements, loc='center', fontsize=12)
 
     plt.tight_layout()
     os.makedirs(os.path.join(grp_dir, 'figures'), exist_ok=True)
     plt.savefig(
-        os.path.join(grp_dir, 'figures', f"boxplot_Z_{contrast.replace(' ', '_')}_space-{space}.png"),
+        os.path.join(grp_dir, 'figures', f"boxplot_Z_{contrast.replace(' ', '_')}_space-{space}.pdf"),
         dpi=300
     )
     plt.show()

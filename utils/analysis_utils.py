@@ -5,7 +5,7 @@ from scipy.ndimage import binary_dilation
 from nilearn import image 
 from scipy.stats import mannwhitneyu
 from statsmodels.stats.multitest import multipletests
-def consecutive_blocks(task_vector):
+def consecutive_blocks_(task_vector):
     blocks = []
     in_block = False
     start = None
@@ -20,6 +20,13 @@ def consecutive_blocks(task_vector):
         blocks.append((start, len(task_vector)-1))
     return blocks
 
+def consecutive_blocks(task_vector):
+    blocks = []
+    for i, val in enumerate(task_vector):
+        if val:  # event at each single timepoint
+            blocks.append((i, i))
+    return blocks
+
 def events_task_vectors(stimfile,n_scans=155,delay_volumes=2,tr=2.12):
     df = pd.read_csv(stimfile, sep='\t', header=None)
     df.columns = ["trial_type", "onset_ms", "event_type", "description"]    
@@ -30,9 +37,14 @@ def events_task_vectors(stimfile,n_scans=155,delay_volumes=2,tr=2.12):
     task_vector_right = np.zeros(n_scans, dtype=bool)
     task_vector_left  = np.zeros(n_scans, dtype=bool)
     task_vector_calc = np.zeros(n_scans, dtype=bool)
+    task_vector_lang = np.zeros(n_scans, dtype=bool)
+    task_vector_visu = np.zeros(n_scans, dtype=bool)
+
     right_keywords = ['clicdvideo']
     left_keywords  = ['clicgvideo']
     calc_keywords = ['calculvideo']
+    lang_keywords = ['phraseVideo']
+    visu_keywords = ['CboardH', 'CboardV']
 
     for _, row in events.iterrows():
         onset_vol = int(np.floor(row['onset'] / tr))
@@ -45,7 +57,11 @@ def events_task_vectors(stimfile,n_scans=155,delay_volumes=2,tr=2.12):
             task_vector_left[onset_vol:end_vol] = True
         elif any(k == ttype for k in calc_keywords):
             task_vector_calc[onset_vol:end_vol] = True
-    return(events, task_vector_right, task_vector_left, task_vector_calc)        
+        elif any(k == ttype for k in lang_keywords):
+            task_vector_lang[onset_vol:end_vol] = True
+        elif any(k == ttype for k in visu_keywords):
+            task_vector_visu[onset_vol:end_vol] = True                        
+    return(events, task_vector_right, task_vector_left, task_vector_calc, task_vector_lang, task_vector_visu)        
 
 def prep_stats_anats_tissues(mask_file, gm_file, wm_file, csf_file, stats_file):
     

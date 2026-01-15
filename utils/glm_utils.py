@@ -15,11 +15,12 @@ def make_design_matrix(stimfile,confounds,confounds_names,minonset,delay_volumes
         df["duration"] = 1.3
         events = df[["onset", "duration", "trial_type"]]
         frame_times = np.arange(n_scans) * tr
-        design_matrix = make_first_level_design_matrix(frame_times, events, min_onset=minonset,
+        design_matrix = make_first_level_design_matrix(frame_times[minonset:], events,
                                                         hrf_model='glover', 
                                                         drift_model=drift_model,
-                                                       add_regs=confounds,
-                                                       add_reg_names=confounds_names
+                                                       add_regs=confounds.iloc[minonset:,:],
+                                                       add_reg_names=confounds_names,
+                                                       min_onset=0
                                                        )
         # Plot it
         plot_design_matrix(design_matrix)

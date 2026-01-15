@@ -36,7 +36,7 @@
 
 #!/bin/bash
 
-WORKDIR="/home/zamor/Documents/TRISTAN/ismrm_dataset/sub-04/data_ONAVoffPEERSoff"
+WORKDIR="/home/zamor/Documents/TRISTAN/imag_dataset"
 
 subjects=("sub-04")
 
@@ -50,10 +50,10 @@ for sub in "${subjects[@]}"; do
 
     singularity run --cleanenv \
       --bind /home/team/freesurfer/7.4.1/license.txt:/freesurfer-license.txt:ro \
-      --bind /home/zamor/Documents/TRISTAN/ismrm_dataset/sub-04/data_ONAVoffPEERSoff/rawdata:/rawdata:ro \
-      --bind /home/zamor/Documents/TRISTAN/ismrm_dataset/sub-04/data_ONAVoffPEERSoff/derivatives/fmriprep:/out:rw \
-      --bind /home/zamor/Documents/TRISTAN/ismrm_dataset/sub-04/data_ONAVoffPEERSoff/tmp:/tmpdir:rw \
-      --bind /home/zamor/Documents/TRISTAN/ismrm_dataset/sub-04/data_ONAVoffPEERSoff/derivatives/freesurfer:/fsdir:ro \
+      --bind /home/zamor/Documents/TRISTAN/imag_dataset/rawdata:/rawdata:ro \
+      --bind /home/zamor/Documents/TRISTAN/imag_dataset/derivatives/fmriprep:/out:rw \
+      --bind /home/zamor/Documents/TRISTAN/imag_dataset/tmp:/tmpdir:rw \
+      --bind /home/zamor/Documents/TRISTAN/imag_dataset/derivatives/freesurfer:/fsdir:ro \
       /home/team/FMRIPREP/fmriprep-23.2.1.simg \
       /rawdata /out participant \
       --skip_bids_validation \

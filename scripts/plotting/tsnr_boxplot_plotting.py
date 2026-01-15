@@ -7,22 +7,19 @@ from tristan_pipeline.utils.plotting_utils import *
 from tristan_pipeline.utils.analysis_utils import *
 from tristan_pipeline.io.params import *
 
-spaces = ["native bold"]
-mocos_ = ["SNAVoffPEERSoff", 
-         "SNAVonPEERSon"]
-#spaces = ["MNI152NLin2009cAsym", "T1w", "native bold"]
-
+spaces = ["MNI152NLin2009cAsym"]
 ###########LOAD SUBJECT-WISE tSNR DATA###########
 subject_tsnr_values = {}
 for subj in subjects:
     subj_values = []
-    for moco_label in mocos:
+    for moco_label in list(mocos.keys()):
         tsnr_all_spaces = []
         for space in spaces:
-            data_dir = f"{base_dir}/sub-{subj:02}/data_{moco_label}"
-            FMRIPREP_PATH = os.path.join(data_dir, 'derivatives', 'fmriprep')
-            tsnr_file = os.path.join(FMRIPREP_PATH, 'stat',
-                                     f"sub-{subj:02}_ses-{sessions[0]}_tSNRmap_space-{space}_{moco_label}.npy")
+            FMRIPREP_PATH =os.path.join(DATA_DIR, 'derivatives', 'fmriprep')
+            tsnr_file = os.path.join(
+                    FMRIPREP_PATH,f'sub-{subj:02}',f'ses-{sessions[0]}', 'stats',
+                    f"sub-{subj:02}_ses-{sessions[0]}_tSNRmap_space-{space}_{moco_label}.npy"
+                )
             if os.path.exists(tsnr_file):
                 tsnr_data = np.load(tsnr_file)
                 tsnr_data = tsnr_data[(tsnr_data > 0) & np.isfinite(tsnr_data)]
@@ -48,9 +45,9 @@ if space=="MNI152NLin2009cAsym":
             group_tsnr_values.append(np.array([]))
 
 
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(9,3))
 n_mocos = len(mocos)
-cluster_spacing = 3       # large gap between mocos
+cluster_spacing = 3.5       # large gap between mocos
 subject_offset = 0.5      # small offset inside cluster
 group_offset = 0 * subject_offset  # slightly larger offset for group
 box_positions = []
@@ -114,24 +111,28 @@ if space=="MNI152NLin2009cAsym":
                  ha='center', va='bottom', fontsize=12, fontweight='bold', color='black')
 # x-ticks at center of each cluster
 tick_positions = [moco_idx * cluster_spacing + (len(subjects) * subject_offset + group_offset)/2 for moco_idx in range(n_mocos)]
-plt.xticks(tick_positions, mocos_)
+plt.xticks(tick_positions, list(mocos.keys()))
 plt.ylabel("tSNR")
 plt.grid(True, alpha=0.3, linestyle='--')
 if space=="MNI152NLin2009cAsym":
-    plt.title(f"Subject and Group-level tSNR Distributions - {space}\n(Significance vs. SNAVoffPEERSoff)", fontweight='bold')
+    plt.title(f"Subject and Group-level tSNR Distributions - {space}\n(Significance vs. SNAVoffPEERSoff)", fontweight='bold', fontsize=12)
 else: 
-    plt.title(f"Subject-wise tSNR Distributions - {space}\n(Significance vs. SNAVoffPEERSoff)", fontweight='bold')
+    plt.title(f"Subject-wise tSNR Distributions - {space}\n(Significance vs. SNAVoffPEERSoff)", fontweight='bold', fontsize=12)
 
 # legend
 legend_elements = [Line2D([0],[0], color=c, lw=3, label=f"sub-{subj:02}") for subj,c in subject_colors.items()]
 if space=="MNI152NLin2009cAsym":
     legend_elements.append(Line2D([0],[0], color='lightsalmon', lw=3, label='Group'))
 
-plt.legend(handles=legend_elements, loc='upper right')
+plt.legend(handles=legend_elements, 
+           #loc='upper right'
+           loc='center',
+           fontsize=12,
+           )
 plt.tight_layout()
 
 os.makedirs(os.path.join(grp_dir,'figures') ,exist_ok=True)
-plt.savefig(os.path.join(os.path.join(grp_dir,'figures'), f"boxplot_tSNR_space-{space}"))
+plt.savefig(os.path.join(os.path.join(grp_dir,'figures'), f"boxplot_tSNR_space-{space}.pdf"))
 
 plt.show()
 
