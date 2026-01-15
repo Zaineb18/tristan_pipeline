@@ -245,3 +245,27 @@ def fsaverage_annot_to_native_surf(subj, FREESURFER_PATH, annotid='HCPMMP1'):
         annot2native.inputs.out_file = outpath
         
         annot2native.run()
+        
+
+def native_annot_surf_to_vol(subid, DATA_DIR, annotid='HCPMMP1'):
+    datadir = DATA_DIR
+    """ datadir is the bids/derivatives/fmriprep-xx.x.x dir (sub-xx inside) """
+    # (Note: uses ANATDIR and VOL_EXT constants) 
+    # ANATDIR = 'anat'  # relative path inside the subject's folder
+    # VOL_EXT = 'nii.gz'
+    # Freesurfer dir not specified here but assumed by the fs. interface to 
+    # be pre-exported with export SUBJECTS_DIR=...
+    
+    vol_outdir = op.join(datadir, subid, 'anat')
+    if not op.exists(vol_outdir):
+        os.mkdir(vol_outdir)
+    outpath = op.join(vol_outdir, f'{annotid}.nii.gz')
+    annot2vol_command = fs.FSCommand(command='mri_aparc2aseg')
+    annot2vol_command.inputs.args = " ".join([
+        f'--s {subid}',
+        f'--annot {annotid}',
+        f'--o {outpath}',
+        ])
+    annot2vol_command.run()
+    
+    return outpath        
