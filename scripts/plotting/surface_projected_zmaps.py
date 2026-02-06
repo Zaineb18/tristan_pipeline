@@ -13,7 +13,7 @@ import pyvista as pv
 import nibabel.freesurfer as fs
 
 space = "T1w"
-contrasts_names = ['calculations','phrases']
+contrasts_names = ['phrases']
 hemis ={'lh':'left', 'rh':'right'}
 
 for subj in subjects:
@@ -59,10 +59,11 @@ for subj in subjects:
                     stat_map=texture,          # z-map
                     hemi=hemis[h],
                     bg_map=native_sulc,   #bg_map          # atlas as background
-                    threshold=2.5,
+                    threshold=1.5,
                     alpha=0.3,                 # makes atlas semi-transparent
                     vmax=6,
-                    colorbar=True
+                    colorbar=True,
+                    cmap="seismic"
                     )
                     ax = fig.axes[0]
                     plotting.plot_surf_contours(
@@ -77,7 +78,7 @@ for subj in subjects:
                     fig.gca().set_title(f"Contrast: {contrast} - sub-{subj:02} \n {moco}",
                                         color=adjust_color_tone(subj_color,moco_brightness[m_idx]),
                                         x=-8, y=1.15, pad=0)
-                    plt.savefig(os.path.join(grp_dir, 'figures', f'sub-{subj:02}_ses-{ses}_surf-{h}_Destrieux_{contrast}_{space}_{moco}'))                
+                    plt.savefig(os.path.join(grp_dir, 'figures', f'sub-{subj:02}_ses-{ses}_surf-{h}_Destrieux_{contrast}_{space}_{moco}.pdf'))                
                     #plt.show()
                 """# Create a discrete colormap
                 cmap = cm.get_cmap('tab20', len(np.unique(lh_labels_native)))

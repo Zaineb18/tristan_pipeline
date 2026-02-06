@@ -82,13 +82,13 @@ for patch, color, lw in zip(box['boxes'], all_colors, all_lw):
     patch.set_linewidth(lw)
 # add stars/arrows for subjects
 for subj_idx, subj in enumerate(subjects):
-    stars,pvalues, pvalues_corr, uvalues, esvalues = compute_stars(subject_tsnr_values[subj])
+    stars,pvalues, pvalues_corr, uvalues = compute_stars(subject_tsnr_values[subj])
     print('subject', subj)
     print('stars', stars)
     print('pvalues', pvalues)
     print('pvalues_corr', pvalues_corr)
     print('uvalues', uvalues)
-    print('effect size', esvalues)
+    #print('effect size', esvalues)
     for moco_idx, star in enumerate(stars):
         pos = moco_idx * cluster_spacing + subj_idx * subject_offset
         median_y = np.median(subject_tsnr_values[subj][moco_idx])
@@ -97,12 +97,12 @@ for subj_idx, subj in enumerate(subjects):
                      ha='center', va='bottom', fontsize=12, fontweight='bold', color='black')        
 # add stars for group
 if space=="MNI152NLin2009cAsym":
-    group_stars,group_p, group_pbon, group_u, group_es = compute_stars(group_tsnr_values)
+    group_stars,group_p, group_pbon, group_u = compute_stars(group_tsnr_values)
     print('stars', group_stars)
     print('pvalues', group_p)
     print('pvalues_corr', group_pbon)
     print('uvalues', group_pbon)
-    print('effect size', group_es)
+    #print('effect size', group_es)
     for moco_idx, star in enumerate(group_stars):
         pos = moco_idx * cluster_spacing + len(subjects) * subject_offset + group_offset
         median_y = np.median(group_tsnr_values[moco_idx])
@@ -132,7 +132,7 @@ plt.legend(handles=legend_elements,
 plt.tight_layout()
 
 os.makedirs(os.path.join(grp_dir,'figures') ,exist_ok=True)
-plt.savefig(os.path.join(os.path.join(grp_dir,'figures'), f"boxplot_tSNR_space-{space}.pdf"))
+plt.savefig(os.path.join(os.path.join(grp_dir,'figures'), f"boxplot_tSNR_space-{space}_Welchttest.pdf"))
 
 plt.show()
 

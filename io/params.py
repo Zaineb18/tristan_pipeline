@@ -7,10 +7,11 @@ DATA_DIR = f"/home/zamor/Documents/TRISTAN/imag_dataset"
 grp_dir = os.path.join(DATA_DIR,"grp_output")
 
 stimfile = "/home/zamor/nasShare/INM-GlobalShare/Boulantetal_Tristan_2025/stimfiles/session1_localizer_standard.csv"
-contrasts_names = ['calculations','clic right vs clic left', 'vertical checkerboard vs horizontal checkerboard', 'phrases']
+contrasts_names = ['calculations','clic right vs clic left', 'checkerboard', 'phrases']
 spaces = [
-          #"MNI152NLin2009cAsym",
-          "T1w"]
+          "MNI152NLin2009cAsym",
+          #"T1w"
+           ]
 subjects = [1,2,3,4]
 sessions = [1]
 

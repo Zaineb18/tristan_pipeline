@@ -3,8 +3,10 @@ import numpy as np
 import nibabel as nib
 from scipy.ndimage import binary_dilation
 from nilearn import image 
-from scipy.stats import mannwhitneyu
+from scipy.stats import mannwhitneyu, ttest_ind, ttest_rel
 from statsmodels.stats.multitest import multipletests
+from scipy.stats import permutation_test
+
 def consecutive_blocks_(task_vector):
     blocks = []
     in_block = False
@@ -117,20 +119,24 @@ def compute_stars(values_list):
             p_values.append(np.nan)
             stats_values.append(np.nan)
             continue
-        stat, p = mannwhitneyu(baseline_data, data, alternative='two-sided')
+        #stat, p = mannwhitneyu(baseline_data, data, alternative='two-sided')
+        stat, p = ttest_ind(baseline_data, data, equal_var=False) #Welch: unpaired t-test
+        #stat, p = ttest_rel(baseline_data, data) #paired t-test
         p_values.append(p)
         stats_values.append(stat)
-
-        n1, n2 = len(baseline_data), len(data)
-        r_rb = 1 - (2 * stat) / (n1 * n2)
-        effect_sizes.append(r_rb)       
+        print('p')
+        #n1, n2 = len(baseline_data), len(data)
+        #r_rb = 1 - (2 * stat) / (n1 * n2)
+        #effect_sizes.append(r_rb)       
     # Bonferroni correction
     _, p_corrected, _, _ = multipletests(p_values[1:], method='bonferroni')
     p_corrected = [np.nan] + list(p_corrected)
     # assign stars
     stars = []
     baseline_median = np.median(baseline_data) if len(baseline_data) > 0 else np.nan
+    #for vals, p in zip(values_list, p_corrected):
     for vals, p in zip(values_list, p_corrected):
+        
         if np.isnan(p):
             stars.append("")
             continue
@@ -150,4 +156,70 @@ def compute_stars(values_list):
             elif current_median < baseline_median:
                 star += "↓"
         stars.append(star)
-    return stars, p_values, p_corrected, stats_values, effect_sizes
+    return stars, p_values, p_corrected, stats_values#, effect_sizes
+
+def _perm_test_mean(x, y, n_perm=10000):
+    res = permutation_test(
+        (x, y),
+        statistic=lambda a, b: np.mean(a) - np.mean(b),
+        permutation_type='independent',
+        n_resamples=n_perm,
+        alternative='two-sided',
+        random_state=42
+    )
+    print('lll')
+    return res.statistic, res.pvalue
+
+
+def compute_stars_z(values_list, n_perm=10000):
+    """
+    Compare suprathreshold z-scores using permutation tests.
+    Tests difference in mean(z | z > threshold).
+
+    values_list[0] = baseline
+    """
+    baseline = values_list[0]
+    p_values = [np.nan]
+    stats_values = [np.nan]
+    for vals in values_list[1:]:
+        if len(baseline) == 0 or len(vals) == 0:
+            p_values.append(np.nan)
+            stats_values.append(np.nan)
+            continue
+
+        stat, p = _perm_test_mean(baseline, vals, n_perm=n_perm)
+
+        stats_values.append(stat)
+        p_values.append(p)
+
+    # ----- Bonferroni correction -----
+    _, p_corrected, _, _ = multipletests(p_values[1:], method="bonferroni")
+    p_corrected = [np.nan] + list(p_corrected)
+
+    # ----- stars + direction -----
+    stars = []
+    baseline_mean = np.mean(baseline) if len(baseline) else np.nan
+    for vals, p in zip(values_list, p_corrected):
+        if np.isnan(p):
+            stars.append("")
+            continue
+
+        if p < 0.001:
+            star = "***"
+        elif p < 0.01:
+            star = "**"
+        elif p < 0.05:
+            star = "*"
+        else:
+            star = ""
+
+        if star and len(vals) > 0:
+            current_mean = np.mean(vals)
+            if current_mean > baseline_mean:
+                star += "↑"
+            elif current_mean < baseline_mean:
+                star += "↓"
+
+        stars.append(star)
+
+    return stars, p_values, p_corrected, stats_values

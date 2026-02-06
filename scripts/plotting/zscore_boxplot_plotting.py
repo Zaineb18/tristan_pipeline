@@ -11,15 +11,25 @@ from nilearn.glm import threshold_stats_img
 space = "T1w"
 mocos_ = ["SNAVoffPEERSoff", 
          "SNAVonPEERSon"]
+#contrasts_names = [
+                #'clic right vs clic left' 
+                #'checkerboard',
+                #'calculations',
+#                'phrases'
+#                    ]
+
 subject_z_values = {contrast: {subj: [] for subj in subjects} for contrast in contrasts_names}
 
 #################LOAD DATA PER SUBJECT / PER MOCO#################
 for subj in subjects:
+    #print('!!!SUBJECT!!!', subj)
     for ses in sessions:
         FMRIPREP_PATH =os.path.join(DATA_DIR, 'derivatives', 'fmriprep')
         for contrast in contrasts_names:
+            #print('!!!CONTRAST!!!',contrast)
             subj_values = []
             for moco in list(mocos.keys()):
+                #print(moco)
                 zmap_path = os.path.join(
                     FMRIPREP_PATH,f'sub-{subj:02}',f'ses-{ses}','stats',
                     f"sub-{subj:02}_ses-{ses}_zmap_{contrast}_{space}_{moco}.nii"                )
@@ -35,9 +45,19 @@ for subj in subjects:
                     arr_pos = arr[(arr > threshold) & np.isfinite(arr)]
                     arr_neg = arr[(arr < -threshold) & np.isfinite(arr)]
                     subj_values.append({"pos": arr_pos, "neg": arr_neg})
+                    #print('Right - MAX ', arr_pos.max(),
+                    #      'MEAN', arr_pos.mean(),
+                    #      'MEADIAN',np.median(arr_pos))
+                    #print('Left - MAX ', arr_neg.min(),
+                    #      'MEAN', arr_neg.mean(),
+                    #      'MEADIAN',np.median(arr_neg))                    
                 else: 
                     arr = arr[(arr > threshold) & np.isfinite(arr)]
                     subj_values.append({"pos": arr, "neg": np.array([])})
+                    #print('MAX ', arr.max(),
+                    #      'MEAN', arr.mean(),
+                    #      'MEADIAN',np.median(arr))
+                                        
             subject_z_values[contrast][subj] = subj_values
 
 for contrast in contrasts_names:
@@ -95,52 +115,51 @@ for contrast in contrasts_names:
         if dual_polarity:
             pos_data = [d["pos"] for d in subj_data]
             neg_data = [d["neg"] for d in subj_data]
-            pos_stars, pos_pvalues, pos_pvalues_corr, pos_uvalues, pos_esvalues = compute_stars(pos_data)
+            pos_stars, pos_pvalues, pos_pvalues_corr, pos_uvalues = compute_stars_z(pos_data)
             neg_data_abs = [np.abs(arr) for arr in neg_data]
-            neg_stars, neg_pvalues, neg_pvalues_corr, neg_uvalues, neg_esvalues = compute_stars(neg_data_abs)
+            neg_stars, neg_pvalues, neg_pvalues_corr, neg_uvalues = compute_stars_z(neg_data_abs)
             
-            print(contrast)
-            print('subject', subj)
+            print('CONTRAST', contrast , ' - SUBJECT', subj )
             print('stars_pos', pos_stars)
             print('pvalues_pos', pos_pvalues)
             print('pvalues_corr_pos', pos_pvalues_corr)
             print('uvalues_pos', pos_uvalues)
-            print('effect size_pos', pos_esvalues)
 
             print('stars_neg', neg_stars)
             print('pvalues_neg', neg_pvalues)
             print('pvalues_corr_neg', neg_pvalues_corr)
             print('uvalues_neg', neg_uvalues)
-            print('effect size_neg', neg_esvalues)            
 
-            for m_idx, (p_star, n_star) in enumerate(zip(pos_stars, neg_stars)):
+            for m_idx, (p_star, n_star, p_pos, p_neg) in enumerate(zip(pos_stars, neg_stars, pos_pvalues_corr, neg_pvalues_corr)):
                 if p_star:
                     pos = m_idx * cluster_spacing + subj_idx * subject_offset
                     median_y = np.median(pos_data[m_idx]) if len(pos_data[m_idx]) > 0 else 0
-                    plt.text(pos, median_y + abs(median_y) * 0.05, p_star,
+                    label = f"{p_star}\np={p_pos:.3g}"
+                    plt.text(pos, median_y + abs(median_y) * 0.05, label,
                              ha='center', va='bottom', fontsize=12, fontweight='bold', color='black')
                 if n_star:
                     pos = m_idx * cluster_spacing + subj_idx * subject_offset + subject_offset - 0.6
                     median_y = np.median(neg_data[m_idx]) if len(neg_data[m_idx]) > 0 else 0
-                    plt.text(pos, median_y - abs(median_y) * 0.05, n_star,
+                    label = f"{n_star}\np={p_neg:.3g}"
+                    plt.text(pos, median_y - abs(median_y) * 0.05, label,
                              ha='center', va='top', fontsize=12, fontweight='bold', color='black')
         else:
             pos_data = [d["pos"] for d in subj_data]
-            stars, pvalues, pvalues_corr, uvalues, esvalues = compute_stars(pos_data)
+            stars, pvalues, pvalues_corr, uvalues = compute_stars_z(pos_data)
             
-            print('subject', subj)
+            print('CONTRAST', contrast , ' - SUBJECT', subj )
             print('stars', stars)
             print('pvalues', pvalues)
             print('pvalues_corr', pvalues_corr)
             print('uvalues', uvalues)
-            print('effect size', esvalues)
 
-            for m_idx, star in enumerate(stars):
+            for m_idx, (star, p) in enumerate(zip(stars,pvalues_corr)):
                 if not star:
                     continue
                 pos = m_idx * cluster_spacing + subj_idx * subject_offset
                 median_y = np.median(pos_data[m_idx]) if len(pos_data[m_idx]) > 0 else 0
-                plt.text(pos, median_y + abs(median_y) * 0.05, star,
+                label = f"{star}\np={p:.3g}"
+                plt.text(pos, median_y + abs(median_y) * 0.05, label,
                          ha='center', va='bottom', fontsize=12, fontweight='bold', color='black')
 
     # Reference lines
@@ -169,7 +188,7 @@ for contrast in contrasts_names:
     plt.tight_layout()
     os.makedirs(os.path.join(grp_dir, 'figures'), exist_ok=True)
     plt.savefig(
-        os.path.join(grp_dir, 'figures', f"boxplot_Z_{contrast.replace(' ', '_')}_space-{space}.pdf"),
+        os.path.join(grp_dir, 'figures', f"boxplot_Z_{contrast.replace(' ', '_')}_space-{space}_permMean.pdf"),
         dpi=300
     )
     plt.show()
