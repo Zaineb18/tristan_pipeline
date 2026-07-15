@@ -62,7 +62,7 @@ def custom_contrast(design_matrix_columns):
     return contrasts
 
 
-def custom_contrast_(design_matrix_columns):
+def custom_contrast_orig(design_matrix_columns):
     elem_contrast = elementary_contrast(design_matrix_columns)
     contrasts = {            
                  'mean signal': elem_contrast['constant'],
@@ -71,5 +71,8 @@ def custom_contrast_(design_matrix_columns):
                  'calculations': elem_contrast['calculvideo']+elem_contrast['calculaudio'],
                  'checkerboard vs the others': elem_contrast['CboardH']+elem_contrast['CboardV']-elem_contrast['calculvideo']-elem_contrast['calculaudio']-elem_contrast['phraseVideo']-elem_contrast['phraseAudio']-elem_contrast['clicDvideo']-elem_contrast['clicGvideo']-elem_contrast['clicDaudio']-elem_contrast['clicGaudio'],
                  'clic right vs clic left': elem_contrast['clicDvideo'] - elem_contrast['clicGvideo'] + elem_contrast['clicDaudio'] - elem_contrast['clicGaudio'],
+                 'checkerboard': elem_contrast['CboardH']+elem_contrast['CboardV'],
+                 'checkerboard vs calculations': elem_contrast['CboardH']+elem_contrast['CboardV']-elem_contrast['calculvideo']-elem_contrast['calculaudio'],
+
                  }
     return contrasts

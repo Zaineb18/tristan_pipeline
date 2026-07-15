@@ -77,8 +77,8 @@ for subj_idx, subj in enumerate(subjects):
     # --- Formatting ---
     plt.xlabel("Timepoint (fMRI Volume #)")
     plt.ylabel("Translation L2 norm (mm)")
-    plt.title(f"fMRIPrep vs SNAV: Motion estimates - sub-{subj:02d}", color=subj_color, fontweight='bold')
-    plt.ylim(0, 0.85)
+    plt.title(f"fMRIPrep vs ServoNav: Motion estimates \nsub-{subj:02d}", color=subj_color, fontweight='bold')
+    plt.ylim(0, 0.6)
     plt.xlim(-1, 160)
     plt.grid(True, linestyle='--', alpha=0.3)
 
@@ -91,7 +91,7 @@ for subj_idx, subj in enumerate(subjects):
                marker=markers[i],
                markersize=6,
                label=m)
-        for i, m in enumerate(list(mocos.keys()))
+        for i, m in enumerate(list(mocos_.keys()))
     ]
     onav_legend = [
         Line2D([0], [0],
@@ -100,15 +100,16 @@ for subj_idx, subj in enumerate(subjects):
                linestyle='--',
                marker=onav_marker,
                markersize=6,
-               label='SNAV')
+               label='ServoNav')
     ]
 
-    first_legend = plt.legend(handles=moco_legend, title="fMRIPrep estimates", loc="upper center")
+    first_legend = plt.legend(handles=moco_legend, title="fMRIPrep estimates", loc="center left")
     plt.gca().add_artist(first_legend)
-    plt.legend(handles=onav_legend, title="SNAV estimates", loc="upper left"#,bbox_to_anchor=(0.45, 1.0)
+    plt.legend(handles=onav_legend, title="ServoNav estimates", loc="upper left",
+               #bbox_to_anchor=(0.45, 1.0)
                )
     plt.tight_layout()
     os.makedirs(os.path.join(grp_dir,'figures') ,exist_ok=True)
-    plt.savefig(os.path.join(grp_dir,'figures',f"sub-{subj:02}_ses-{ses}_MotionEst.pdf"))
+    plt.savefig(os.path.join(grp_dir,'figures',f"sub-{subj:02}_ses-{ses}_MotionEstISMRM.png"))
 
     plt.show()

@@ -59,6 +59,10 @@ dist/
 derivatives/
 work/
 tmp/
+scripts/preproc/bin/ap_pa_caro.py
+scripts/io/bin/convert_to_bids.sh
+
+
 
 # If using Datalad or BIDS
 .datalad/

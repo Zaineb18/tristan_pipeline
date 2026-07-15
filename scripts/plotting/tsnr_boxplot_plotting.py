@@ -82,11 +82,10 @@ for patch, color, lw in zip(box['boxes'], all_colors, all_lw):
     patch.set_linewidth(lw)
 # add stars/arrows for subjects
 for subj_idx, subj in enumerate(subjects):
-    stars,pvalues, pvalues_corr, uvalues = compute_stars(subject_tsnr_values[subj])
+    stars,pvalues, uvalues = compute_stars(subject_tsnr_values[subj])
     print('subject', subj)
     print('stars', stars)
     print('pvalues', pvalues)
-    print('pvalues_corr', pvalues_corr)
     print('uvalues', uvalues)
     #print('effect size', esvalues)
     for moco_idx, star in enumerate(stars):
@@ -97,11 +96,9 @@ for subj_idx, subj in enumerate(subjects):
                      ha='center', va='bottom', fontsize=12, fontweight='bold', color='black')        
 # add stars for group
 if space=="MNI152NLin2009cAsym":
-    group_stars,group_p, group_pbon, group_u = compute_stars(group_tsnr_values)
+    group_stars,group_p, group_u = compute_stars(group_tsnr_values)
     print('stars', group_stars)
     print('pvalues', group_p)
-    print('pvalues_corr', group_pbon)
-    print('uvalues', group_pbon)
     #print('effect size', group_es)
     for moco_idx, star in enumerate(group_stars):
         pos = moco_idx * cluster_spacing + len(subjects) * subject_offset + group_offset

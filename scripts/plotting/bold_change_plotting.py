@@ -16,7 +16,7 @@ from tristan_pipeline.utils.plotting_utils import *
 contrasts = ["clic right vs clic left"]
 spaces = ["T1w"]
 
-figtype = "sep"
+figtype = "tog"
 
 # ----------------
 # LOOP OVER SUBJECTS
@@ -127,12 +127,12 @@ for subj in subjects:
                 for start, end in consecutive_blocks(task_vector_right[delay_volumes:]):
                     axes[0].fill_between(range(start, end+1), 6, 9, color="red", alpha=1.0, edgecolor="red", linewidth=2)
                 axes[0].set_xlabel("Timepoint (fMRI Volume #)")
-                axes[0].set_ylabel("% BOLD Signal Change")
+                axes[0].set_ylabel("%ΔBOLD")
                 axes[0].set_xlim(-1, 160)
                 axes[0].set_ylim(-5, 10)
                 axes[0].figure.tight_layout()
                 axes[0].set_title(
-                    f"% BOLD Change: Click Right \n Sub-{subj:02}",
+                    f"%ΔBOLD: Click Right \n Sub-{subj:02}",
                     color=subj_color,
                     fontweight='bold',
                     fontsize=40,
@@ -155,14 +155,14 @@ for subj in subjects:
                 for start, end in consecutive_blocks(task_vector_left[delay_volumes:]):
                     axes[1].fill_between(range(start, end+1), 6, 9, color="blue", alpha=1.0, edgecolor="blue", linewidth=2)
                 axes[1].set_xlabel("Timepoint (fMRI Volume #)")
-                axes[1].set_ylabel("% BOLD Signal Change")
+                axes[1].set_ylabel("%ΔBOLD")
                 axes[1].set_xlim(-1, 160)
                 axes[1].set_ylim(-5, 10)
                 axes[1].set_title(
-                    f"% BOLD Change: Click Left \n Sub-{subj:02}",
+                    f"% BOLD Change: Click Right vs Click Left \n Sub-{subj:02}",
                     color=subj_color,
                     fontweight='bold',
-                    fontsize=40,
+                    fontsize=20,
                 )
                 axes[1].legend(loc='lower right')                
         if figtype=="tog":
@@ -179,7 +179,7 @@ for subj in subjects:
                 ax.plot(
                     x[delay_volumes:], percent_change_right-percent_change_left,
                     color=adjust_color_tone(subj_color,moco_brightness[i]), marker=item_r["marker"], lw=item_r["linewidth"], alpha=0.9,
-                    label= item_r["moco"]
+                    #label= item_r["moco"]
                 )
                 i+=1
                 ax.grid(True)
@@ -194,13 +194,13 @@ for subj in subjects:
             #plt.gca().add_artist(plt.legend(handles=moco_lines, title="Motion Correction", loc="upper right"))
                 ax.legend(loc='lower right')
                 ax.set_xlabel("Timepoint (fMRI Volume #)")
-                ax.set_ylabel("% BOLD Signal Change")
+                ax.set_ylabel("%ΔBOLD: Click Right - Click Left")
                 ax.set_xlim(-1, 160)
                 ax.set_ylim(-12, 12)
                 ax.figure.tight_layout()
                 fig.tight_layout(rect=[0, 0, 1, 0.95])  # leave space at top for suptitle
                 fig.suptitle(
-                    f"% BOLD Change: Click Right vs Click Left \n Sub-{subj:02}",
+                    f"%ΔBOLD: Click Right vs Click Left \n Sub-{subj:02}",
                     color=subj_color,
                     fontweight='bold',
                     fontsize=40,
@@ -211,7 +211,7 @@ for subj in subjects:
         out_dir = os.path.join(FMRIPREP_PATH, 'figures')
         os.makedirs(out_dir, exist_ok=True)
         plt.savefig(os.path.join(os.path.join(grp_dir,'figures'),
-            f'sub-{subj:02}_ses-{ses}_DeltaBOLDTest_contrast-{contrast}.pdf'))
+            f'sub-{subj:02}_ses-{ses}_DeltaBOLDTest_contrast-{contrast}_ISMRM.png'))
             
         plt.show()
 

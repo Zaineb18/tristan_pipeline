@@ -18,42 +18,18 @@ contrasts_names = ['phrases']
 hemis = {'lh': 'left',
          #'rh': 'right'
          }
-
-PARCEL_NAME_MAP = {
-    # Language
-    "G_front_inf-Opercular": "Inferior frontal gyrus (opercular / Broca)",
-    "G_front_inf-Triangul": "Inferior frontal gyrus (triangular / Broca)",
-    "G_front_inf-Orbital": "Inferior frontal gyrus (orbital)",
-    "G_temp_sup-Lateral": "Superior temporal gyrus",
-    "G_temp_sup-Plan_tempo": "Planum temporale",
-    "G_temp_sup-Plan_polar": "Temporal pole (superior)",
-    "G_temporal_middle": "Middle temporal gyrus",
-    "G_temporal_inf": "Inferior temporal gyrus",
-    "Pole_temporal": "Temporal pole",
-    "S_temporal_sup": "Superior temporal sulcus",
-    "S_temporal_inf": "Inferior temporal sulcus",
-    # Math
-    "G_parietal_sup": "Superior parietal lobule",
-    "G_parietal_inf-Angular": "Angular gyrus",
-    "G_parietal_inf-Supramar": "Supramarginal gyrus",
-    "S_parietal_inf": "Inferior parietal sulcus",
-    "S_parietal_sup": "Superior parietal sulcus",
-    "G_front_middle": "Middle frontal gyrus",
-    "S_front_middle": "Middle frontal sulcus",
-    "S_front_sup": "Superior frontal sulcus",
-}
 PARCEL_NAME_MAP = {
     # ---------- LANGUAGE ----------
     "G_front_inf-Opercular": "Inferior frontal gyrus (Broca)", #Speech production, articulation, grammar (core Broca’s area) (ok)
     "G_front_inf-Triangul": "Inferior frontal gyrus (Broca)", #Sentence structure, controlled language output (Broca’s area) (ok)
     "S_precentral-inf-part": "Inferior precentral Sulcus", #Motor planning for speech (mouth, tongue, lips) (ok)
-    "G_temp_sup-Lateral": "Superior temporal gyrus", #Understanding spoken language, phoneme processing (ok)
+    #"G_temp_sup-Lateral": "Superior temporal gyrus", #Understanding spoken language, phoneme processing (ok)
     "G_temp_sup-Plan_tempo": "Planum temporale", #Auditory–language integration, phonology (Planum temporale) (ok)
-    "G_temp_sup-Plan_polar": "Superior temporal pole", #High-level speech and voice processing (ok)
-    "G_temporal_middle": "Middle temporal gyrus", #Word meaning, lexical–semantic processing (ok)
-    "Pole_temporal": "Temporal pole", #Conceptual knowledge, semantic memory (ok)
+    #"G_temp_sup-Plan_polar": "Superior temporal pole", #High-level speech and voice processing (ok)
+    #"G_temporal_middle": "Middle temporal gyrus", #Word meaning, lexical–semantic processing (ok)
+    #"Pole_temporal": "Temporal pole", #Conceptual knowledge, semantic memory (ok)
     "S_temporal_sup": "Superior temporal sulcus", #Linking sounds to meaning, social language cues (ok)
-    "S_temporal_inf": "Inferior temporal sulcus", #Visual–semantic associations (words, objects) (ok)
+    #"S_temporal_inf": "Inferior temporal sulcus", #Visual–semantic associations (words, objects) (ok)
     "G_pariet_inf-Supramar": "Supramarginal gyrus", #Phonological working memory, reading, sound–symbol mapping (ok)
     "Lat_Fis-post": "Posterior sylvian fissure", #Anatomical hub of the perisylvian language network  
     #"G_front_inf-Orbital": "Inferior frontal gyrus",
@@ -65,15 +41,14 @@ PARCEL_NAME_MAP = {
     #"S_parietal_inf": "Inferior parietal sulcus", #Numeric operations, visuospatial processing 
     #"S_parietal_sup": "Superior parietal sulcus", #Spatial reasoning, magnitude manipulation
     "G_pariet_inf-Angular": "Angular gyrus", #Arithmetic facts, symbolic meaning, number–word links
-    "S_front_middle": "Middle frontal sulcus", #Executive control during calculations (ok)
-    "S_front_sup": "Superior frontal sulcus", #Attention and monitoring during complex math (ok)
+    #"S_front_middle": "Middle frontal sulcus", #Executive control during calculations (ok)
+    #"S_front_sup": "Superior frontal sulcus", #Attention and monitoring during complex math (ok)
     "S_precentral-sup-part": "Superior Precentral Sulcus", #Motor planning for hand and speech actions (ok)
     "S_central": "Central Sulcus", #Boundary integrating perception and action (ok)
     # "S_precentral-sup-part": "Superior Precentral Sulcus",
-    #"G_front_middle": "Middle frontal gyrus", #Working memory, multi-step problem solving
+    "G_front_middle": "Middle frontal gyrus", #Working memory, multi-step problem solving
     #"G_precentral": "Primary Motor Cortex", 
-    #"G_postcentral": "Primary Somatosensory Cortex",
-
+    
 }
 TARGET_PARCELS = set(PARCEL_NAME_MAP.keys())
 subjects=[2]
@@ -149,8 +124,8 @@ for subj in subjects:
                         label_text = PARCEL_NAME_MAP[raw_name]
                         
                         #x, y, _ = proj3d.proj_transform(centroid[0], centroid[1], centroid[2],
-                        #                                ax.get_proj())
-                        if label_text in ["Superior parietal lobule", "Intraparietal sulcus (IPS)"]:
+                        #                  """              ax.get_proj())
+                        """if label_text in ["Superior parietal lobule", "Intraparietal sulcus (IPS)"]:
                             ax.text(centroid[0], centroid[1], centroid[2]+7,
                             #names[lab],
                             label_text,
@@ -190,7 +165,7 @@ for subj in subjects:
                             fontsize=15,
                             color="black",
                             ha="center",
-                            va="center")
+                            va="center")"""
                     
                         #x2d, y2d, _ = proj3d.proj_transform(centroid[0], centroid[1], centroid[2], ax.get_proj())
                         #ax.text2D(
@@ -207,8 +182,7 @@ for subj in subjects:
                         os.path.join(
                             grp_dir,
                             'figures',
-                            f'sub-{subj:02}_ses-{ses}_surf-{h}_Destrieux_{space}_{moco}.pdf'),
-                        
-                    )
+                            f'sub-{subj:02}_ses-{ses}_surf-{h}_Destrieux_{space}_{moco}_ISMRMNoLabels_.png'),
+                        )
                     plt.show()
                     #plt.close(fig)
